@@ -18,7 +18,7 @@
         }
         .app-container {
             width: 100%;
-            max-width: 440px;
+            max-width: 480px;
             background: #ffffff;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
@@ -100,7 +100,7 @@
         .filter-group {
             margin-bottom: 18px;
         }
-        select, input[type="text"] {
+        input[type="text"] {
             width: 100%;
             padding: 14px 18px;
             border: 1px solid #cbd5e1;
@@ -112,33 +112,16 @@
             outline: none;
             transition: all 0.2s ease-in-out;
         }
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-            cursor: pointer;
-        }
-        select:focus, input[type="text"]:focus {
+        input[type="text"]:focus {
             border-color: #94a3b8;
         }
-        select:disabled, input:disabled {
+        input:disabled {
             background-color: #f8fafc;
             color: #94a3b8;
             border-color: #e2e8f0;
             cursor: not-allowed;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
         }
         
-        .divider {
-            text-align: center;
-            margin: 24px 0;
-            font-size: 11px;
-            color: #94a3b8;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
         .search-title {
             font-size: 12px;
             font-weight: 700;
@@ -181,52 +164,79 @@
             background-color: #e2e8f0;
         }
         
-        .total-banner {
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            color: #15803d;
-            padding: 14px;
-            text-align: center;
-            font-weight: 700;
-            border-radius: 8px;
-            margin-top: 24px;
-            margin-bottom: 18px;
-            font-size: 15px;
-        }
-        .total-banner span {
-            font-size: 20px;
-            margin-left: 8px;
-            font-weight: 800;
-        }
+        /* 📊 Layout matching template metrics style */
         .table-container {
             width: 100%;
-            overflow-x: auto;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            margin-top: 25px;
+            border: 1px solid #b4c6e7;
+            background-color: #fff;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
+        .table-header-main {
+            background-color: #d9e1f2;
+            color: #5b3194;
+            font-weight: 800;
+            font-style: italic;
+            font-size: 15px;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid #b4c6e7;
+        }
         th {
-            background-color: #f8fafc;
-            color: #475569;
+            border: 1px solid #b4c6e7;
+            padding: 8px 6px;
             font-weight: 700;
-            text-align: left;
-            padding: 12px 10px;
-            border-bottom: 2px solid #e2e8f0;
-            white-space: nowrap;
+            text-align: center;
         }
+        th.col-comp { color: #2f5597; background-color: #d9e1f2; text-align: left; padding-left: 10px;}
+        th.col-stock { color: #2f5597; background-color: #e2efda; }
+        th.col-val { color: #c00000; background-color: #fce4d6; }
+        
         td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
+            padding: 8px 6px;
+            border: 1px solid #b4c6e7;
+            color: #000;
+            vertical-align: middle;
         }
-        tr:nth-child(even) {
-            background-color: #f8fafc;
+        .td-company {
+            font-weight: 700;
+            text-transform: uppercase;
+            padding-left: 10px;
         }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: 700; color: #0f172a; }
+        
+        .bar-cell {
+            position: relative;
+            z-index: 1;
+            text-align: right;
+            padding-right: 10px;
+            font-weight: 600;
+        }
+
+        .tr-total td {
+            font-weight: 800;
+            font-size: 14px;
+            border: 2px solid #000;
+        }
+        .total-label {
+            background-color: #ffff00;
+            text-align: center;
+        }
+        .total-stock-val {
+            background-color: #1f4e78;
+            color: #fff;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .total-price-val {
+            background-color: #ffff00;
+            color: #ff0000;
+            text-align: right;
+            padding-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -249,26 +259,6 @@
 
         <div id="app-content" style="display: none;">
             <div class="filter-group">
-                <select id="categorySelect">
-                    <option value="">-- SELECT PRODUCT CATEGORY --</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <select id="companySelect" disabled>
-                    <option value="">-- SELECT COMPANY --</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <select id="modelCatSelect" disabled>
-                    <option value="">-- SELECT MODEL CATEGORY --</option>
-                </select>
-            </div>
-
-            <div class="divider">-- OR CONNECTED FILTERS --</div>
-
-            <div class="filter-group">
                 <div class="search-title" id="searchTitle">QUICK ITEM WISE SEARCH • READY (0)</div>
                 <input type="text" id="itemSearchInput" list="itemOptions" placeholder="Type name here (e.g. 17 iphone)..." disabled autocomplete="off">
                 <datalist id="itemOptions"></datalist>
@@ -280,18 +270,16 @@
             </div>
 
             <div id="resultsSection" style="display: none;">
-                <div class="total-banner">
-                    TOTAL OUTSTANDING VALUE: <span id="totalStockLabel">0</span>
-                </div>
-
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Item/Model</th>
-                                <th>Store</th>
-                                <th class="text-center">Value</th>
-                                <th class="text-center">MOP</th>
+                                <th colspan="3" class="table-header-main">SMART MOBILE + TAB</th>
+                            </tr>
+                            <tr>
+                                <th class="col-comp">COMPANY</th>
+                                <th class="col-stock">STOCK AVAIL.</th>
+                                <th class="col-val">STOCK VALUE</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
@@ -306,14 +294,10 @@
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec";
 
         let rawData = [];
-        let dataHeaders = [];
-        let locationHeaders = [];
-        let currentFilteredList = []; 
+        let allHeaders = [];
+        let locationPairs = [];
         let currentActiveSheet = "Sheet2"; 
 
-        const categorySelect = document.getElementById('categorySelect');
-        const companySelect = document.getElementById('companySelect');
-        const modelCatSelect = document.getElementById('modelCatSelect');
         const itemSearchInput = document.getElementById('itemSearchInput');
         const itemOptions = document.getElementById('itemOptions');
         const searchTitle = document.getElementById('searchTitle');
@@ -321,11 +305,10 @@
         const resetBtn = document.getElementById('resetBtn');
         const resultsSection = document.getElementById('resultsSection');
         const inventoryTableBody = document.getElementById('inventoryTableBody');
-        const totalStockLabel = document.getElementById('totalStockLabel');
         const loaderOverlay = document.getElementById('loader-overlay');
         const appContent = document.getElementById('app-content');
 
-        const coreFields = ["Item/Model", "COMPANY", "PRODUCT CATEGORY", "MODEL WISE CATEGORY", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
+        const coreFields = ["COMPANY", "PRODUCT CATEGORY", "Item/Model", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
 
         function getSheetFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -334,7 +317,6 @@
 
         async function loadData(sheetName) {
             currentActiveSheet = sheetName;
-            
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
@@ -350,21 +332,30 @@
                 const response = await fetch(`${BASE_API_URL}?sheet=${sheetName}`);
                 const json = await response.json();
                 
-                const allRows = json.rows || [];
-                rawData = allRows.filter(row => {
-                    const stockVal = parseInt(row["TOTAL STOCK"] || row["TOTAL OUTSTANDING"]) || 0;
-                    return stockVal > 0;
-                });
+                rawData = json.rows || [];
+                allHeaders = json.headers || [];
                 
-                dataHeaders = json.headers || [];
-                locationHeaders = dataHeaders.filter(h => !coreFields.includes(h));
+                // Identify repeated location code header pairs dynamically from index 4 onwards
+                locationPairs = [];
+                for (let i = 0; i < allHeaders.length; i++) {
+                    const headerName = allHeaders[i];
+                    if (!coreFields.includes(headerName) && allHeaders[i+1] === headerName) {
+                        locationPairs.push({
+                            code: headerName,
+                            qtyKey: `${headerName}_qty_${i}`, // Uniquely reference duplicate keys if structural json parses it this way
+                            valKey: `${headerName}_val_${i+1}`,
+                            qtyIdx: i,
+                            valIdx: i+1
+                        });
+                        i++; // Skip paired item
+                    }
+                }
 
                 loaderOverlay.style.display = 'none';
                 appContent.style.display = 'block';
                 document.getElementById('sheetTabs').style.display = 'flex';
 
-                resetDropdownsState();
-                initializeFilters();
+                resetApp();
             } catch (error) {
                 console.error(error);
                 const textElement = loaderOverlay.querySelector('.loader-text');
@@ -372,188 +363,133 @@
             }
         }
 
-        function resetDropdownsState() {
-            categorySelect.innerHTML = '<option value="">-- SELECT PRODUCT CATEGORY --</option>';
-            companySelect.innerHTML = '<option value="">-- SELECT COMPANY --</option>';
-            companySelect.disabled = true;
-            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
-            modelCatSelect.disabled = true;
-            itemSearchInput.value = "";
+        function formatIndianCurrency(num) {
+            return '₹ ' + Number(num).toLocaleString('en-IN');
         }
 
-        function initializeFilters() {
-            const categories = [...new Set(rawData.map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
-            
-            categories.forEach(cat => {
-                const option = new Option(cat, cat);
-                categorySelect.add(option);
-            });
-
-            currentFilteredList = [...rawData];
-            updateItemDataList(currentFilteredList);
-        }
-
-        function switchSheet(sheetName) {
-            if(sheetName === currentActiveSheet) return;
-            
-            const nextUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?sheet=' + sheetName;
-            window.history.pushState({path:nextUrl}, '', nextUrl);
-            
-            loadData(sheetName);
-        }
-
-        categorySelect.addEventListener('change', handleCategoryChange);
-        companySelect.addEventListener('change', handleCompanyChange);
-        modelCatSelect.addEventListener('change', handleModelCatChange);
-        
-        itemSearchInput.addEventListener('input', () => {
-            resultsSection.style.display = 'none';
-        });
-
-        function handleCategoryChange() {
-            resultsSection.style.display = 'none';
-            const selectedCat = categorySelect.value;
-            companySelect.innerHTML = '<option value="">-- SELECT COMPANY --</option>';
-            companySelect.disabled = !selectedCat;
-            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
-            modelCatSelect.disabled = true;
-            itemSearchInput.value = ""; 
-
-            if (!selectedCat) {
-                currentFilteredList = [...rawData];
-                updateItemDataList(currentFilteredList);
-                return;
-            }
-
-            const filteredData = rawData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
-            const companies = [...new Set(filteredData.map(r => r["COMPANY"]))].filter(Boolean).sort();
-            companies.forEach(comp => companySelect.add(new Option(comp, comp)));
-
-            currentFilteredList = filteredData;
-            updateItemDataList(currentFilteredList);
-        }
-
-        function handleCompanyChange() {
-            resultsSection.style.display = 'none';
-            const selectedCat = categorySelect.value;
-            const selectedComp = companySelect.value;
-            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
-            modelCatSelect.disabled = !selectedComp;
-            itemSearchInput.value = ""; 
-
-            if (!selectedComp) {
-                let filteredData = rawData;
-                if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
-                currentFilteredList = filteredData;
-                updateItemDataList(currentFilteredList);
-                return;
-            }
-
-            let filteredData = rawData.filter(r => r["COMPANY"] === selectedComp);
-            if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
-
-            const modelCategories = [...new Set(filteredData.map(r => r["MODEL WISE CATEGORY"]))].filter(Boolean).sort();
-            modelCatSelect.add(new Option("All MODEL", "ALL"));
-            modelCategories.forEach(modCat => modelCatSelect.add(new Option(modCat, modCat)));
-            modelCatSelect.value = "ALL";
-
-            currentFilteredList = filteredData;
-            updateItemDataList(currentFilteredList);
-        }
-
-        function handleModelCatChange() {
-            resultsSection.style.display = 'none';
-            itemSearchInput.value = "";
-            const selectedCat = categorySelect.value;
-            const AlliesComp = companySelect.value;
-            const selectedModelCat = modelCatSelect.value;
-
-            let filteredData = rawData.filter(r => r["COMPANY"] === AlliesComp);
-            if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
-            
-            if (selectedModelCat && selectedModelCat !== "ALL") {
-                filteredData = filteredData.filter(r => r["MODEL WISE CATEGORY"] === selectedModelCat);
-            }
-
-            currentFilteredList = filteredData;
-            updateItemDataList(currentFilteredList);
-        }
-
-        function updateItemDataList(dataset) {
-            itemOptions.innerHTML = "";
-            itemSearchInput.disabled = dataset.length === 0;
-            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${dataset.length})`;
-
-            const sortedItems = dataset.sort((a, b) => String(a["Item/Model"]).localeCompare(String(b["Item/Model"])));
-            sortedItems.forEach(row => {
-                const option = document.createElement('option');
-                option.value = row["Item/Model"];
-                itemOptions.appendChild(option);
-            });
-        }
-
-        function generateVerticalReport() {
+        function generateCompanySummaryReport() {
+            const targetCategories = ["SMART MOBILE", "TABLET"];
             const typedValue = itemSearchInput.value.trim().toLowerCase();
-            let recordsToDisplay = [];
+            
+            let summaryMap = {};
+            let grandTotalStock = 0;
+            let grandTotalValue = 0;
 
-            if (typedValue) {
-                const exactMatch = currentFilteredList.find(r => String(r["Item/Model"]).trim().toLowerCase() === typedValue);
-                if (!exactMatch) {
-                    alert("No exact matching item found. Please select an option from the list.");
-                    return;
+            rawData.forEach(row => {
+                const cat = String(row["PRODUCT CATEGORY"] || '').toUpperCase().trim();
+                if (!targetCategories.includes(cat)) return;
+
+                if (typedValue && !String(row["Item/Model"]).toLowerCase().includes(typedValue)) return;
+
+                const company = String(row["COMPANY"] || 'UNKNOWN').trim().toUpperCase();
+                
+                let objectKeys = Object.keys(row);
+                let rowStock = 0;
+                let rowValue = 0;
+
+                // Loop through columns to cleanly find mapped indexes or raw position data arrays
+                if (Array.isArray(row)) {
+                    // Handled if data comes parsed as an ordered Array row sequence
+                    locationPairs.forEach(pair => {
+                        rowStock += parseInt(row[pair.qtyIdx]) || 0;
+                        rowValue += parseFloat(row[pair.valIdx]) || 0;
+                    });
+                } else {
+                    // Handled if data object keys represent sequence values
+                    locationPairs.forEach(pair => {
+                        const qtyVal = parseInt(row[objectKeys[pair.qtyIdx]]) || 0;
+                        const amtVal = parseFloat(row[objectKeys[pair.valIdx]]) || 0;
+                        rowStock += qtyVal;
+                        rowValue += amtVal;
+                    });
                 }
-                recordsToDisplay.push(exactMatch);
-            } else {
-                recordsToDisplay = [...currentFilteredList];
-            }
 
-            if (recordsToDisplay.length === 0) {
-                alert("No records available to display for the current selection.");
-                return;
-            }
+                if (rowStock > 0 || rowValue > 0) {
+                    if (!summaryMap[company]) {
+                        summaryMap[company] = { stock: 0, value: 0 };
+                    }
+                    summaryMap[company].stock += rowStock;
+                    summaryMap[company].value += rowValue;
+                    
+                    grandTotalStock += rowStock;
+                    grandTotalValue += rowValue;
+                }
+            });
+
+            let maxStock = 1;
+            let maxValue = 1;
+            Object.values(summaryMap).forEach(c => {
+                if (c.stock > maxStock) maxStock = c.stock;
+                if (c.value > maxValue) maxValue = c.value;
+            });
 
             inventoryTableBody.innerHTML = "";
-            let overallStockSum = 0;
+            const sortedCompanies = Object.keys(summaryMap).sort();
 
-            recordsToDisplay.forEach(activeRecord => {
-                const itemName = activeRecord["Item/Model"] || "N/A";
-                const mopValue = activeRecord["MOP"] || "N/A";
-
-                locationHeaders.forEach(location => {
-                    const stockCount = parseInt(activeRecord[location]) || 0;
-                    
-                    if (stockCount > 0) {
-                        overallStockSum += stockCount;
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${itemName}</td>
-                            <td>${location}</td>
-                            <td class="text-center font-bold">${stockCount}</td>
-                            <td class="text-center">${mopValue}</td>
-                        `;
-                        inventoryTableBody.appendChild(row);
-                    }
-                });
-            });
-
-            if (overallStockSum === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="4" class="text-center" style="color:#999;">No active records found across locations</td></tr>`;
+            if (sortedCompanies.length === 0) {
+                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No matching records found</td></tr>`;
+                resultsSection.style.display = 'block';
+                return;
             }
 
-            totalStockLabel.innerText = overallStockSum;
+            sortedCompanies.forEach(company => {
+                const data = summaryMap[company];
+                const stockPct = (data.stock / maxStock) * 100;
+                const valuePct = (data.value / maxValue) * 100;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="td-company">${company}</td>
+                    <td class="bar-cell" style="background: linear-gradient(to right, #7dd3fc ${stockPct}%, #ffffff ${stockPct}%);">${data.stock}</td>
+                    <td class="bar-cell" style="background: linear-gradient(to right, #93c5fd ${valuePct}%, #ffffff ${valuePct}%);">${formatIndianCurrency(Math.round(data.value))}</td>
+                `;
+                inventoryTableBody.appendChild(row);
+            });
+
+            const totalRow = document.createElement('tr');
+            totalRow.className = "tr-total";
+            totalRow.innerHTML = `
+                <td class="total-label">TOTAL</td>
+                <td class="total-stock-val">${grandTotalStock}</td>
+                <td class="total-price-val">${formatIndianCurrency(Math.round(grandTotalValue))}</td>
+            `;
+            inventoryTableBody.appendChild(totalRow);
+
             resultsSection.style.display = 'block';
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         function resetApp() {
-            resetDropdownsState();
-            currentFilteredList = [...rawData];
-            updateItemDataList(currentFilteredList);
-            resultsSection.style.display = 'none';
+            itemSearchInput.value = "";
+            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${rawData.length})`;
+            
+            itemOptions.innerHTML = "";
+            itemSearchInput.disabled = rawData.length === 0;
+            
+            let uniqueness = new Set();
+            rawData.forEach(row => {
+                const model = row["Item/Model"];
+                if(model && !uniqueness.has(model)) {
+                    uniqueness.add(model);
+                    const option = document.createElement('option');
+                    option.value = model;
+                    itemOptions.appendChild(option);
+                }
+            });
+
+            generateCompanySummaryReport();
         }
 
-        searchBtn.addEventListener('click', generateVerticalReport);
+        function switchSheet(sheetName) {
+            if(sheetName === currentActiveSheet) return;
+            const nextUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?sheet=' + sheetName;
+            window.history.pushState({path:nextUrl}, '', nextUrl);
+            loadData(sheetName);
+        }
+
+        searchBtn.addEventListener('click', generateCompanySummaryReport);
         resetBtn.addEventListener('click', resetApp);
+        itemSearchInput.addEventListener('input', () => { resultsSection.style.display = 'none'; });
 
         loadData(getSheetFromUrl());
     </script>
