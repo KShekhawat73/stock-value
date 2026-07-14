@@ -114,7 +114,7 @@
             cursor: pointer;
         }
         select[multiple] {
-            height: 110px;
+            height: 120px;
             padding: 8px 12px;
             cursor: pointer;
         }
@@ -355,7 +355,7 @@
             });
         }
 
-        // Dynamically populates the Category list when a specific store is selected
+        // Populates categories that exist AND have > 0 quantity/value for the chosen store
         function updateCategoryDropdown() {
             const selectedStore = storeSelect.value;
             
@@ -365,10 +365,12 @@
                 return;
             }
 
-            // Get categories that have valid values for the selected store
             const availableCategories = [...new Set(
-                rawRows.filter(row => String(row["STORE NAME"]).trim() === selectedStore.trim())
-                       .map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
+                rawRows.filter(row => {
+                    const matchStore = String(row["STORE NAME"]).trim() === selectedStore.trim();
+                    const hasStock = (parseInt(row["VOLUME"]) || 0) > 0 || (parseFloat(row["VALUE"]) || 0) > 0;
+                    return matchStore && hasStock;
+                }).map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
             )].filter(Boolean).sort();
 
             categorySelect.innerHTML = '<option value="ALL" selected>-- ALL CATEGORIES --</option>';
@@ -385,7 +387,6 @@
                 return;
             }
 
-            // Capture all selected items from the multi-select box
             const selectedCategories = Array.from(categorySelect.selectedOptions).map(opt => opt.value);
             const isAllSelected = selectedCategories.includes("ALL");
 
@@ -400,12 +401,12 @@
 
                 const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
                 
-                // Skip if a specific category target filter condition isn't matched
                 if (!isAllSelected && !selectedCategories.includes(category)) return;
 
                 const volume = parseInt(row["VOLUME"]) || 0;
                 const value = parseFloat(row["VALUE"]) || 0;
 
+                // Enforce strictly non-zero inventory rendering items
                 if (volume > 0 || value > 0) {
                     if (!summaryMap[category]) {
                         summaryMap[category] = { volume: 0, value: 0 };
@@ -424,7 +425,7 @@
             const sortedCategories = Object.keys(summaryMap).sort();
 
             if (sortedCategories.length === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No matching records found for this selection.</td></tr>`;
+                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No matching records with active stock found.</td></tr>`;
                 resultsSection.style.display = 'block';
                 return;
             }
