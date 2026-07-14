@@ -180,10 +180,11 @@
             background-color: #fff;
         }
         
-        .bar-cell {
+        .data-cell {
             text-align: right;
             padding-right: 10px;
             font-weight: 600;
+            background-color: #ffffff;
         }
 
         .tr-total td {
@@ -257,7 +258,6 @@
     </div>
 
     <script>
-        // Data strictly points to Sheet3 as standard target source 
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec?sheet=Sheet3";
 
         let rawRows = [];
@@ -300,7 +300,6 @@
         function initializeStoreDropdown() {
             storeSelect.innerHTML = '<option value="">-- SELECT STORE NAME --</option>';
             
-            // Extract distinct store names from the database dynamic fields
             const stores = [...new Set(rawRows.map(r => r["STORE NAME"]))].filter(Boolean).sort();
             
             stores.forEach(store => {
@@ -316,14 +315,12 @@
                 return;
             }
 
-            // Set report view dynamic title header
             tableMainHeader.innerText = selectedStore;
 
             let summaryMap = {};
             let grandTotalVolume = 0;
             let grandTotalValue = 0;
 
-            // Filter rows matching the chosen store layout condition
             rawRows.forEach(row => {
                 if (String(row["STORE NAME"]).trim() !== selectedStore.trim()) return;
 
@@ -340,15 +337,10 @@
                 }
             });
 
-            // Calculate metrics totals
             Object.values(summaryMap).forEach(c => {
                 grandTotalVolume += c.volume;
                 grandTotalValue += c.value;
             });
-
-            // Find visual boundaries for data fill calculations
-            let maxVolume = Math.max(...Object.values(summaryMap).map(o => o.volume), 1);
-            let maxValue = Math.max(...Object.values(summaryMap).map(o => o.value), 1);
 
             inventoryTableBody.innerHTML = "";
             const sortedCategories = Object.keys(summaryMap).sort();
@@ -361,19 +353,16 @@
 
             sortedCategories.forEach(category => {
                 const data = summaryMap[category];
-                const volPct = (data.volume / maxVolume) * 100;
-                const valPct = (data.value / maxValue) * 100;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="td-category">${category}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #7dd3fc ${volPct}%, transparent ${volPct}%); background-color:#eaeaea50;">${data.volume}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #93c5fd ${valPct}%, transparent ${valPct}%); background-color:#eaeaea50;">${formatIndianCurrency(Math.round(data.value))}</td>
+                    <td class="data-cell">${data.volume}</td>
+                    <td class="data-cell">${formatIndianCurrency(Math.round(data.value))}</td>
                 `;
                 inventoryTableBody.appendChild(row);
             });
 
-            // Append structured Total Footers
             const totalRow = document.createElement('tr');
             totalRow.className = "tr-total";
             totalRow.innerHTML = `
@@ -396,7 +385,6 @@
         resetBtn.addEventListener('click', resetApp);
         storeSelect.addEventListener('change', () => { resultsSection.style.display = 'none'; });
 
-        // Instantiate
         loadData();
     </script>
 </body>
