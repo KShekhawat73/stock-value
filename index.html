@@ -70,7 +70,6 @@
             border-color: #15803d;
         }
 
-        /* 3D Animated Loader */
         .loader-container {
             display: flex;
             flex-direction: column;
@@ -112,15 +111,6 @@
             outline: none;
             transition: all 0.2s ease-in-out;
         }
-        input[type="text"]:focus {
-            border-color: #94a3b8;
-        }
-        input:disabled {
-            background-color: #f8fafc;
-            color: #94a3b8;
-            border-color: #e2e8f0;
-            cursor: not-allowed;
-        }
         
         .search-title {
             font-size: 12px;
@@ -152,19 +142,12 @@
             background-color: #15803d;
             color: white;
         }
-        .btn-primary:hover:not(:disabled) {
-            background-color: #166534;
-        }
         .btn-secondary {
             background-color: #f1f5f9;
             color: #475569;
             border: 1px solid #e2e8f0;
         }
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
         
-        /* 📊 Layout matching template metrics style */
         .table-container {
             width: 100%;
             margin-top: 25px;
@@ -183,7 +166,7 @@
             font-style: italic;
             font-size: 15px;
             text-align: center;
-            padding: 6px;
+            padding: 8px;
             border: 1px solid #b4c6e7;
         }
         th {
@@ -193,7 +176,7 @@
             text-align: center;
         }
         th.col-comp { color: #2f5597; background-color: #d9e1f2; text-align: left; padding-left: 10px;}
-        th.col-stock { color: #2f5597; background-color: #e2efda; }
+        th.col-stock { color: #2f5597; background-color: #fce4d6; }
         th.col-val { color: #c00000; background-color: #fce4d6; }
         
         td {
@@ -206,11 +189,10 @@
             font-weight: 700;
             text-transform: uppercase;
             padding-left: 10px;
+            background-color: #fff;
         }
         
         .bar-cell {
-            position: relative;
-            z-index: 1;
             text-align: right;
             padding-right: 10px;
             font-weight: 600;
@@ -220,6 +202,7 @@
             font-weight: 800;
             font-size: 14px;
             border: 2px solid #000;
+            padding: 10px 6px;
         }
         .total-label {
             background-color: #ffff00;
@@ -293,9 +276,8 @@
     <script>
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec";
 
-        let rawData = [];
-        let allHeaders = [];
-        let locationPairs = [];
+        let rawRows = [];
+        let rawHeaders = [];
         let currentActiveSheet = "Sheet2"; 
 
         const itemSearchInput = document.getElementById('itemSearchInput');
@@ -308,7 +290,7 @@
         const loaderOverlay = document.getElementById('loader-overlay');
         const appContent = document.getElementById('app-content');
 
-        const coreFields = ["COMPANY", "PRODUCT CATEGORY", "Item/Model", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
+        const exclusionFields = ["COMPANY", "PRODUCT CATEGORY", "Item/Model", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
 
         function getSheetFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -321,9 +303,6 @@
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
             
-            const textElement = loaderOverlay.querySelector('.loader-text');
-            if(textElement) textElement.innerText = `🔄 Syncing details from ${sheetName}...`;
-            
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             const currentTab = document.getElementById(`btn-${sheetName}`);
             if(currentTab) currentTab.classList.add('active');
@@ -332,24 +311,8 @@
                 const response = await fetch(`${BASE_API_URL}?sheet=${sheetName}`);
                 const json = await response.json();
                 
-                rawData = json.rows || [];
-                allHeaders = json.headers || [];
-                
-                // Identify repeated location code header pairs dynamically from index 4 onwards
-                locationPairs = [];
-                for (let i = 0; i < allHeaders.length; i++) {
-                    const headerName = allHeaders[i];
-                    if (!coreFields.includes(headerName) && allHeaders[i+1] === headerName) {
-                        locationPairs.push({
-                            code: headerName,
-                            qtyKey: `${headerName}_qty_${i}`, // Uniquely reference duplicate keys if structural json parses it this way
-                            valKey: `${headerName}_val_${i+1}`,
-                            qtyIdx: i,
-                            valIdx: i+1
-                        });
-                        i++; // Skip paired item
-                    }
-                }
+                rawRows = json.rows || [];
+                rawHeaders = json.headers || [];
 
                 loaderOverlay.style.display = 'none';
                 appContent.style.display = 'block';
@@ -375,7 +338,7 @@
             let grandTotalStock = 0;
             let grandTotalValue = 0;
 
-            rawData.forEach(row => {
+            rawRows.forEach(row => {
                 const cat = String(row["PRODUCT CATEGORY"] || '').toUpperCase().trim();
                 if (!targetCategories.includes(cat)) return;
 
@@ -383,26 +346,25 @@
 
                 const company = String(row["COMPANY"] || 'UNKNOWN').trim().toUpperCase();
                 
-                let objectKeys = Object.keys(row);
                 let rowStock = 0;
                 let rowValue = 0;
 
-                // Loop through columns to cleanly find mapped indexes or raw position data arrays
-                if (Array.isArray(row)) {
-                    // Handled if data comes parsed as an ordered Array row sequence
-                    locationPairs.forEach(pair => {
-                        rowStock += parseInt(row[pair.qtyIdx]) || 0;
-                        rowValue += parseFloat(row[pair.valIdx]) || 0;
-                    });
-                } else {
-                    // Handled if data object keys represent sequence values
-                    locationPairs.forEach(pair => {
-                        const qtyVal = parseInt(row[objectKeys[pair.qtyIdx]]) || 0;
-                        const amtVal = parseFloat(row[objectKeys[pair.valIdx]]) || 0;
-                        rowStock += qtyVal;
-                        rowValue += amtVal;
-                    });
-                }
+                // Safely read values based directly on header names to prevent indexing mixups
+                Object.keys(row).forEach(key => {
+                    if (exclusionFields.includes(key)) return;
+                    
+                    // Value column entries usually contain decimal values or larger currency representations
+                    const val = parseFloat(row[key]) || 0;
+                    
+                    if (val > 0) {
+                        // If it's a whole, smaller integer number, count it as stock count, otherwise add to valuation pool
+                        if (Number.isInteger(val) && val < 5000) { 
+                            rowStock += val;
+                        } else {
+                            rowValue += val;
+                        }
+                    }
+                });
 
                 if (rowStock > 0 || rowValue > 0) {
                     if (!summaryMap[company]) {
@@ -410,18 +372,18 @@
                     }
                     summaryMap[company].stock += rowStock;
                     summaryMap[company].value += rowValue;
-                    
-                    grandTotalStock += rowStock;
-                    grandTotalValue += rowValue;
                 }
             });
 
-            let maxStock = 1;
-            let maxValue = 1;
+            // Calculate correct Totals
             Object.values(summaryMap).forEach(c => {
-                if (c.stock > maxStock) maxStock = c.stock;
-                if (c.value > maxValue) maxValue = c.value;
+                grandTotalStock += c.stock;
+                grandTotalValue += c.value;
             });
+
+            // Peak calculation values for clear comparative visual gradient sizes
+            let maxStock = Math.max(...Object.values(summaryMap).map(o => o.stock), 1);
+            let maxValue = Math.max(...Object.values(summaryMap).map(o => o.value), 1);
 
             inventoryTableBody.innerHTML = "";
             const sortedCompanies = Object.keys(summaryMap).sort();
@@ -440,8 +402,8 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="td-company">${company}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #7dd3fc ${stockPct}%, #ffffff ${stockPct}%);">${data.stock}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #93c5fd ${valuePct}%, #ffffff ${valuePct}%);">${formatIndianCurrency(Math.round(data.value))}</td>
+                    <td class="bar-cell" style="background: linear-gradient(to right, #6ec6ff ${stockPct}%, transparent ${stockPct}%); background-color:#eaeaea50;">${data.stock}</td>
+                    <td class="bar-cell" style="background: linear-gradient(to right, #90caf9 ${valuePct}%, transparent ${valuePct}%); background-color:#eaeaea50;">${formatIndianCurrency(Math.round(data.value))}</td>
                 `;
                 inventoryTableBody.appendChild(row);
             });
@@ -461,13 +423,13 @@
 
         function resetApp() {
             itemSearchInput.value = "";
-            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${rawData.length})`;
+            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${rawRows.length})`;
             
             itemOptions.innerHTML = "";
-            itemSearchInput.disabled = rawData.length === 0;
+            itemSearchInput.disabled = rawRows.length === 0;
             
             let uniqueness = new Set();
-            rawData.forEach(row => {
+            rawRows.forEach(row => {
                 const model = row["Item/Model"];
                 if(model && !uniqueness.has(model)) {
                     uniqueness.add(model);
