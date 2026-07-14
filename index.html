@@ -8,7 +8,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             background-color: #f4f6f9;
             color: #2c3e50;
             display: flex;
@@ -20,47 +20,47 @@
             width: 100%;
             max-width: 480px;
             background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            padding: 30px 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 24px 20px;
             box-sizing: border-box;
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
         .brand-logo {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         .brand-logo h1 {
             margin: 0;
             font-size: 26px;
             color: #0b3c5d;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: 800;
         }
         .brand-logo p {
-            margin: 6px 0 0 0;
+            margin: 2px 0 0 0;
             font-size: 11px;
             color: #8a99ad;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             font-weight: 600;
             text-transform: uppercase;
         }
         
         .sheet-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         .tab-btn {
             flex: 1;
-            padding: 10px 5px;
+            padding: 12px 5px;
             border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-            color: #334155;
+            background-color: #f8fafc;
+            color: #475569;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
             text-align: center;
             transition: all 0.2s ease;
         }
@@ -68,6 +68,7 @@
             background-color: #15803d; 
             color: white;
             border-color: #15803d;
+            box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
         }
 
         .loader-container {
@@ -78,10 +79,10 @@
             padding: 40px 0;
         }
         .spinner-3d {
-            width: 44px;
-            height: 44px;
-            border: 5px solid #e2e8f0;
-            border-top: 5px solid #15803d;
+            width: 54px;
+            height: 54px;
+            border: 6px solid #e2e8f0;
+            border-top: 6px solid #15803d;
             border-radius: 50%;
             animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
@@ -90,41 +91,68 @@
             100% { transform: rotate(360deg); }
         }
         .loader-text {
-            margin-top: 20px;
-            font-size: 13px;
+            margin-top: 24px;
+            font-size: 14px;
             font-weight: 600;
-            color: #64748b;
+            color: #4a5568;
+            letter-spacing: 0.5px;
         }
 
         .filter-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
-        input[type="text"] {
+        select, input[type="text"] {
             width: 100%;
-            padding: 14px 18px;
-            border: 1px solid #cbd5e1;
+            padding: 14px 16px;
+            border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             background-color: #fff;
             color: #1e293b;
             box-sizing: border-box;
             outline: none;
             transition: all 0.2s ease-in-out;
         }
-        
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41L6 7.41L0 1.41L1.41 0z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            cursor: pointer;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: #15803d;
+            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.12);
+        }
+        select:disabled, input:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
         .search-title {
             font-size: 12px;
             font-weight: 700;
             color: #16a34a;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: 0.5px;
-            text-transform: uppercase;
         }
         
         .button-group {
             display: flex;
-            gap: 14px;
-            margin-top: 28px;
+            gap: 12px;
+            margin-top: 24px;
+            margin-bottom: 24px;
         }
         .btn {
             flex: 1;
@@ -135,12 +163,16 @@
             font-weight: 600;
             cursor: pointer;
             text-align: center;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             outline: none;
         }
         .btn-primary {
             background-color: #15803d;
             color: white;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #166534;
         }
         .btn-secondary {
             background-color: #f1f5f9;
@@ -148,78 +180,51 @@
             border: 1px solid #e2e8f0;
         }
         
+        .total-banner {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+            padding: 14px;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 15px;
+        }
+        .total-banner span {
+            font-size: 20px;
+            margin-left: 8px;
+            font-weight: 800;
+        }
         .table-container {
             width: 100%;
-            margin-top: 25px;
-            border: 1px solid #b4c6e7;
-            background-color: #fff;
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-        .table-header-main {
-            background-color: #d9e1f2;
-            color: #5b3194;
-            font-weight: 800;
-            font-style: italic;
-            font-size: 15px;
-            text-align: center;
-            padding: 8px;
-            border: 1px solid #b4c6e7;
-        }
         th {
-            border: 1px solid #b4c6e7;
-            padding: 8px 6px;
+            background-color: #f8fafc;
+            color: #475569;
             font-weight: 700;
-            text-align: center;
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
         }
-        th.col-comp { color: #2f5597; background-color: #d9e1f2; text-align: left; padding-left: 10px;}
-        th.col-stock { color: #2f5597; background-color: #fce4d6; }
-        th.col-val { color: #c00000; background-color: #fce4d6; }
-        
         td {
-            padding: 8px 6px;
-            border: 1px solid #b4c6e7;
-            color: #000;
-            vertical-align: middle;
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
         }
-        .td-company {
-            font-weight: 700;
-            text-transform: uppercase;
-            padding-left: 10px;
-            background-color: #fff;
+        tr:nth-child(even) {
+            background-color: #f8fafc;
         }
-        
-        .bar-cell {
-            text-align: right;
-            padding-right: 10px;
-            font-weight: 600;
-        }
-
-        .tr-total td {
-            font-weight: 800;
-            font-size: 14px;
-            border: 2px solid #000;
-            padding: 10px 6px;
-        }
-        .total-label {
-            background-color: #ffff00;
-            text-align: center;
-        }
-        .total-stock-val {
-            background-color: #1f4e78;
-            color: #fff;
-            text-align: right;
-            padding-right: 10px;
-        }
-        .total-price-val {
-            background-color: #ffff00;
-            color: #ff0000;
-            text-align: right;
-            padding-right: 10px;
-        }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: 700; color: #0f172a; }
     </style>
 </head>
 <body>
@@ -242,6 +247,26 @@
 
         <div id="app-content" style="display: none;">
             <div class="filter-group">
+                <select id="categorySelect">
+                    <option value="">-- SELECT PRODUCT CATEGORY --</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="companySelect" disabled>
+                    <option value="">-- SELECT COMPANY --</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="modelCatSelect" disabled>
+                    <option value="">-- SELECT MODEL CATEGORY --</option>
+                </select>
+            </div>
+
+            <div class="divider">-- OR CONNECTED FILTERS --</div>
+
+            <div class="filter-group">
                 <div class="search-title" id="searchTitle">QUICK ITEM WISE SEARCH • READY (0)</div>
                 <input type="text" id="itemSearchInput" list="itemOptions" placeholder="Type name here (e.g. 17 iphone)..." disabled autocomplete="off">
                 <datalist id="itemOptions"></datalist>
@@ -253,16 +278,18 @@
             </div>
 
             <div id="resultsSection" style="display: none;">
+                <div class="total-banner">
+                    TOTAL OUTSTANDING VALUE: <span id="totalStockLabel">0</span>
+                </div>
+
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th colspan="3" class="table-header-main">SMART MOBILE + TAB</th>
-                            </tr>
-                            <tr>
-                                <th class="col-comp">COMPANY</th>
-                                <th class="col-stock">STOCK AVAIL.</th>
-                                <th class="col-val">STOCK VALUE</th>
+                                <th>Item/Model</th>
+                                <th>Store</th>
+                                <th class="text-center">Value</th>
+                                <th class="text-center">MOP</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
@@ -276,10 +303,15 @@
     <script>
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec";
 
-        let rawRows = [];
-        let rawHeaders = [];
+        let rawData = [];
+        let dataHeaders = [];
+        let locationHeaders = [];
+        let currentFilteredList = []; 
         let currentActiveSheet = "Sheet2"; 
 
+        const categorySelect = document.getElementById('categorySelect');
+        const companySelect = document.getElementById('companySelect');
+        const modelCatSelect = document.getElementById('modelCatSelect');
         const itemSearchInput = document.getElementById('itemSearchInput');
         const itemOptions = document.getElementById('itemOptions');
         const searchTitle = document.getElementById('searchTitle');
@@ -287,10 +319,11 @@
         const resetBtn = document.getElementById('resetBtn');
         const resultsSection = document.getElementById('resultsSection');
         const inventoryTableBody = document.getElementById('inventoryTableBody');
+        const totalStockLabel = document.getElementById('totalStockLabel');
         const loaderOverlay = document.getElementById('loader-overlay');
         const appContent = document.getElementById('app-content');
 
-        const exclusionFields = ["COMPANY", "PRODUCT CATEGORY", "Item/Model", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
+        const coreFields = ["Item/Model", "COMPANY", "PRODUCT CATEGORY", "MODEL WISE CATEGORY", "STATUS", "MOP", "TOTAL STOCK", "TOTAL OUTSTANDING", "MAY Mtd", "JUNE Mtd", "JULY Mtd"];
 
         function getSheetFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -299,9 +332,13 @@
 
         async function loadData(sheetName) {
             currentActiveSheet = sheetName;
+            
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
+            
+            const textElement = loaderOverlay.querySelector('.loader-text');
+            if(textElement) textElement.innerText = `🔄 Syncing details from ${sheetName}...`;
             
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             const currentTab = document.getElementById(`btn-${sheetName}`);
@@ -311,14 +348,21 @@
                 const response = await fetch(`${BASE_API_URL}?sheet=${sheetName}`);
                 const json = await response.json();
                 
-                rawRows = json.rows || [];
-                rawHeaders = json.headers || [];
+                const allRows = json.rows || [];
+                rawData = allRows.filter(row => {
+                    const stockVal = parseInt(row["TOTAL STOCK"] || row["TOTAL OUTSTANDING"]) || 0;
+                    return stockVal > 0;
+                });
+                
+                dataHeaders = json.headers || [];
+                locationHeaders = dataHeaders.filter(h => !coreFields.includes(h));
 
                 loaderOverlay.style.display = 'none';
                 appContent.style.display = 'block';
                 document.getElementById('sheetTabs').style.display = 'flex';
 
-                resetApp();
+                resetDropdownsState();
+                initializeFilters();
             } catch (error) {
                 console.error(error);
                 const textElement = loaderOverlay.querySelector('.loader-text');
@@ -326,132 +370,188 @@
             }
         }
 
-        function formatIndianCurrency(num) {
-            return '₹ ' + Number(num).toLocaleString('en-IN');
+        function resetDropdownsState() {
+            categorySelect.innerHTML = '<option value="">-- SELECT PRODUCT CATEGORY --</option>';
+            companySelect.innerHTML = '<option value="">-- SELECT COMPANY --</option>';
+            companySelect.disabled = true;
+            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
+            modelCatSelect.disabled = true;
+            itemSearchInput.value = "";
         }
 
-        function generateCompanySummaryReport() {
-            const targetCategories = ["SMART MOBILE", "TABLET"];
-            const typedValue = itemSearchInput.value.trim().toLowerCase();
+        function initializeFilters() {
+            const categories = [...new Set(rawData.map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
             
-            let summaryMap = {};
-            let grandTotalStock = 0;
-            let grandTotalValue = 0;
-
-            rawRows.forEach(row => {
-                const cat = String(row["PRODUCT CATEGORY"] || '').toUpperCase().trim();
-                if (!targetCategories.includes(cat)) return;
-
-                if (typedValue && !String(row["Item/Model"]).toLowerCase().includes(typedValue)) return;
-
-                const company = String(row["COMPANY"] || 'UNKNOWN').trim().toUpperCase();
-                
-                let rowStock = 0;
-                let rowValue = 0;
-
-                // Safely read values based directly on header names to prevent indexing mixups
-                Object.keys(row).forEach(key => {
-                    if (exclusionFields.includes(key)) return;
-                    
-                    // Value column entries usually contain decimal values or larger currency representations
-                    const val = parseFloat(row[key]) || 0;
-                    
-                    if (val > 0) {
-                        // If it's a whole, smaller integer number, count it as stock count, otherwise add to valuation pool
-                        if (Number.isInteger(val) && val < 5000) { 
-                            rowStock += val;
-                        } else {
-                            rowValue += val;
-                        }
-                    }
-                });
-
-                if (rowStock > 0 || rowValue > 0) {
-                    if (!summaryMap[company]) {
-                        summaryMap[company] = { stock: 0, value: 0 };
-                    }
-                    summaryMap[company].stock += rowStock;
-                    summaryMap[company].value += rowValue;
-                }
+            categories.forEach(cat => {
+                const option = new Option(cat, cat);
+                categorySelect.add(option);
             });
 
-            // Calculate correct Totals
-            Object.values(summaryMap).forEach(c => {
-                grandTotalStock += c.stock;
-                grandTotalValue += c.value;
-            });
+            currentFilteredList = [...rawData];
+            updateItemDataList(currentFilteredList);
+        }
 
-            // Peak calculation values for clear comparative visual gradient sizes
-            let maxStock = Math.max(...Object.values(summaryMap).map(o => o.stock), 1);
-            let maxValue = Math.max(...Object.values(summaryMap).map(o => o.value), 1);
+        function switchSheet(sheetName) {
+            if(sheetName === currentActiveSheet) return;
+            
+            const nextUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?sheet=' + sheetName;
+            window.history.pushState({path:nextUrl}, '', nextUrl);
+            
+            loadData(sheetName);
+        }
 
-            inventoryTableBody.innerHTML = "";
-            const sortedCompanies = Object.keys(summaryMap).sort();
+        categorySelect.addEventListener('change', handleCategoryChange);
+        companySelect.addEventListener('change', handleCompanyChange);
+        modelCatSelect.addEventListener('change', handleModelCatChange);
+        
+        itemSearchInput.addEventListener('input', () => {
+            resultsSection.style.display = 'none';
+        });
 
-            if (sortedCompanies.length === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No matching records found</td></tr>`;
-                resultsSection.style.display = 'block';
+        function handleCategoryChange() {
+            resultsSection.style.display = 'none';
+            const selectedCat = categorySelect.value;
+            companySelect.innerHTML = '<option value="">-- SELECT COMPANY --</option>';
+            companySelect.disabled = !selectedCat;
+            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
+            modelCatSelect.disabled = true;
+            itemSearchInput.value = ""; 
+
+            if (!selectedCat) {
+                currentFilteredList = [...rawData];
+                updateItemDataList(currentFilteredList);
                 return;
             }
 
-            sortedCompanies.forEach(company => {
-                const data = summaryMap[company];
-                const stockPct = (data.stock / maxStock) * 100;
-                const valuePct = (data.value / maxValue) * 100;
+            const filteredData = rawData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
+            const companies = [...new Set(filteredData.map(r => r["COMPANY"]))].filter(Boolean).sort();
+            companies.forEach(comp => companySelect.add(new Option(comp, comp)));
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="td-company">${company}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #6ec6ff ${stockPct}%, transparent ${stockPct}%); background-color:#eaeaea50;">${data.stock}</td>
-                    <td class="bar-cell" style="background: linear-gradient(to right, #90caf9 ${valuePct}%, transparent ${valuePct}%); background-color:#eaeaea50;">${formatIndianCurrency(Math.round(data.value))}</td>
-                `;
-                inventoryTableBody.appendChild(row);
+            currentFilteredList = filteredData;
+            updateItemDataList(currentFilteredList);
+        }
+
+        function handleCompanyChange() {
+            resultsSection.style.display = 'none';
+            const selectedCat = categorySelect.value;
+            const selectedComp = companySelect.value;
+            modelCatSelect.innerHTML = '<option value="">-- SELECT MODEL CATEGORY --</option>';
+            modelCatSelect.disabled = !selectedComp;
+            itemSearchInput.value = ""; 
+
+            if (!selectedComp) {
+                let filteredData = rawData;
+                if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
+                currentFilteredList = filteredData;
+                updateItemDataList(currentFilteredList);
+                return;
+            }
+
+            let filteredData = rawData.filter(r => r["COMPANY"] === selectedComp);
+            if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
+
+            const modelCategories = [...new Set(filteredData.map(r => r["MODEL WISE CATEGORY"]))].filter(Boolean).sort();
+            modelCatSelect.add(new Option("All MODEL", "ALL"));
+            modelCategories.forEach(modCat => modelCatSelect.add(new Option(modCat, modCat)));
+            modelCatSelect.value = "ALL";
+
+            currentFilteredList = filteredData;
+            updateItemDataList(currentFilteredList);
+        }
+
+        function handleModelCatChange() {
+            resultsSection.style.display = 'none';
+            itemSearchInput.value = "";
+            const selectedCat = categorySelect.value;
+            const AlliesComp = companySelect.value;
+            const selectedModelCat = modelCatSelect.value;
+
+            let filteredData = rawData.filter(r => r["COMPANY"] === AlliesComp);
+            if (selectedCat) filteredData = filteredData.filter(r => r["PRODUCT CATEGORY"] === selectedCat);
+            
+            if (selectedModelCat && selectedModelCat !== "ALL") {
+                filteredData = filteredData.filter(r => r["MODEL WISE CATEGORY"] === selectedModelCat);
+            }
+
+            currentFilteredList = filteredData;
+            updateItemDataList(currentFilteredList);
+        }
+
+        function updateItemDataList(dataset) {
+            itemOptions.innerHTML = "";
+            itemSearchInput.disabled = dataset.length === 0;
+            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${dataset.length})`;
+
+            const sortedItems = dataset.sort((a, b) => String(a["Item/Model"]).localeCompare(String(b["Item/Model"])));
+            sortedItems.forEach(row => {
+                const option = document.createElement('option');
+                option.value = row["Item/Model"];
+                itemOptions.appendChild(option);
+            });
+        }
+
+        function generateVerticalReport() {
+            const typedValue = itemSearchInput.value.trim().toLowerCase();
+            let recordsToDisplay = [];
+
+            if (typedValue) {
+                const exactMatch = currentFilteredList.find(r => String(r["Item/Model"]).trim().toLowerCase() === typedValue);
+                if (!exactMatch) {
+                    alert("No exact matching item found. Please select an option from the list.");
+                    return;
+                }
+                recordsToDisplay.push(exactMatch);
+            } else {
+                recordsToDisplay = [...currentFilteredList];
+            }
+
+            if (recordsToDisplay.length === 0) {
+                alert("No records available to display for the current selection.");
+                return;
+            }
+
+            inventoryTableBody.innerHTML = "";
+            let overallStockSum = 0;
+
+            recordsToDisplay.forEach(activeRecord => {
+                const itemName = activeRecord["Item/Model"] || "N/A";
+                const mopValue = activeRecord["MOP"] || "N/A";
+
+                locationHeaders.forEach(location => {
+                    const stockCount = parseInt(activeRecord[location]) || 0;
+                    
+                    if (stockCount > 0) {
+                        overallStockSum += stockCount;
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${itemName}</td>
+                            <td>${location}</td>
+                            <td class="text-center font-bold">${stockCount}</td>
+                            <td class="text-center">${mopValue}</td>
+                        `;
+                        inventoryTableBody.appendChild(row);
+                    }
+                });
             });
 
-            const totalRow = document.createElement('tr');
-            totalRow.className = "tr-total";
-            totalRow.innerHTML = `
-                <td class="total-label">TOTAL</td>
-                <td class="total-stock-val">${grandTotalStock}</td>
-                <td class="total-price-val">${formatIndianCurrency(Math.round(grandTotalValue))}</td>
-            `;
-            inventoryTableBody.appendChild(totalRow);
+            if (overallStockSum === 0) {
+                inventoryTableBody.innerHTML = `<tr><td colspan="4" class="text-center" style="color:#999;">No active records found across locations</td></tr>`;
+            }
 
+            totalStockLabel.innerText = overallStockSum;
             resultsSection.style.display = 'block';
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         function resetApp() {
-            itemSearchInput.value = "";
-            searchTitle.innerText = `QUICK ITEM WISE SEARCH • READY (${rawRows.length})`;
-            
-            itemOptions.innerHTML = "";
-            itemSearchInput.disabled = rawRows.length === 0;
-            
-            let uniqueness = new Set();
-            rawRows.forEach(row => {
-                const model = row["Item/Model"];
-                if(model && !uniqueness.has(model)) {
-                    uniqueness.add(model);
-                    const option = document.createElement('option');
-                    option.value = model;
-                    itemOptions.appendChild(option);
-                }
-            });
-
-            generateCompanySummaryReport();
+            resetDropdownsState();
+            currentFilteredList = [...rawData];
+            updateItemDataList(currentFilteredList);
+            resultsSection.style.display = 'none';
         }
 
-        function switchSheet(sheetName) {
-            if(sheetName === currentActiveSheet) return;
-            const nextUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?sheet=' + sheetName;
-            window.history.pushState({path:nextUrl}, '', nextUrl);
-            loadData(sheetName);
-        }
-
-        searchBtn.addEventListener('click', generateCompanySummaryReport);
+        searchBtn.addEventListener('click', generateVerticalReport);
         resetBtn.addEventListener('click', resetApp);
-        itemSearchInput.addEventListener('input', () => { resultsSection.style.display = 'none'; });
 
         loadData(getSheetFromUrl());
     </script>
