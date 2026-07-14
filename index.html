@@ -8,7 +8,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             background-color: #f4f6f9;
             color: #2c3e50;
             display: flex;
@@ -18,50 +18,49 @@
         }
         .app-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            padding: 24px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 30px 24px;
             box-sizing: border-box;
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
         .brand-logo {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
         .brand-logo h1 {
             margin: 0;
             font-size: 26px;
             color: #0b3c5d;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             font-weight: 800;
         }
         .brand-logo p {
-            margin: 2px 0 0 0;
+            margin: 6px 0 0 0;
             font-size: 11px;
             color: #8a99ad;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             font-weight: 600;
             text-transform: uppercase;
         }
         
-        /* 📊 Navigation tabs - Finance Green Theme */
         .sheet-tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 24px;
         }
         .tab-btn {
             flex: 1;
-            padding: 12px 5px;
+            padding: 10px 5px;
             border: 1px solid #cbd5e1;
-            background-color: #f8fafc;
-            color: #475569;
+            background-color: #ffffff;
+            color: #334155;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
             text-align: center;
             transition: all 0.2s ease;
         }
@@ -69,10 +68,9 @@
             background-color: #15803d; 
             color: white;
             border-color: #15803d;
-            box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
         }
 
-        /* 🎨 3D एनिमेटेड लोडर */
+        /* 3D Animated Loader */
         .loader-container {
             display: flex;
             flex-direction: column;
@@ -81,12 +79,11 @@
             padding: 40px 0;
         }
         .spinner-3d {
-            width: 54px;
-            height: 54px;
-            border: 6px solid #e2e8f0;
-            border-top: 6px solid #15803d;
+            width: 44px;
+            height: 44px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #15803d;
             border-radius: 50%;
-            filter: drop-shadow(0px 8px 16px rgba(21, 128, 61, 0.25));
             animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
         @keyframes spin3d {
@@ -94,27 +91,21 @@
             100% { transform: rotate(360deg); }
         }
         .loader-text {
-            margin-top: 24px;
-            font-size: 14px;
+            margin-top: 20px;
+            font-size: 13px;
             font-weight: 600;
-            color: #4a5568;
-            letter-spacing: 0.5px;
-            animation: pulseText 1.5s ease-in-out infinite;
-        }
-        @keyframes pulseText {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
+            color: #64748b;
         }
 
         .filter-group {
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
         select, input[type="text"] {
             width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid #cbd5e1;
+            padding: 14px 18px;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             background-color: #fff;
             color: #1e293b;
             box-sizing: border-box;
@@ -124,43 +115,43 @@
         select {
             appearance: none;
             -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41L6 7.41L0 1.41L1.41 0z'/></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat;
-            background-position: right 16px center;
+            background-position: right 18px center;
             cursor: pointer;
         }
         select:focus, input[type="text"]:focus {
-            border-color: #15803d;
-            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.12);
+            border-color: #94a3b8;
         }
         select:disabled, input:disabled {
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: #94a3b8;
             border-color: #e2e8f0;
             cursor: not-allowed;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
         }
+        
         .divider {
             text-align: center;
-            margin: 20px 0;
+            margin: 24px 0;
             font-size: 11px;
             color: #94a3b8;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
         .search-title {
             font-size: 12px;
             font-weight: 700;
             color: #16a34a;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         
         .button-group {
             display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            margin-bottom: 24px;
+            gap: 14px;
+            margin-top: 28px;
         }
         .btn {
             flex: 1;
@@ -171,21 +162,15 @@
             font-weight: 600;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.15s ease;
             outline: none;
         }
         .btn-primary {
             background-color: #15803d;
             color: white;
-            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
         }
         .btn-primary:hover:not(:disabled) {
             background-color: #166534;
-            box-shadow: 0 6px 16px rgba(21, 128, 61, 0.25);
-            transform: translateY(-1px);
-        }
-        .btn-primary:active {
-            transform: scale(0.98);
         }
         .btn-secondary {
             background-color: #f1f5f9;
@@ -194,10 +179,6 @@
         }
         .btn-secondary:hover {
             background-color: #e2e8f0;
-            color: #334155;
-        }
-        .btn-secondary:active {
-            transform: scale(0.98);
         }
         
         .total-banner {
@@ -207,6 +188,7 @@
             text-align: center;
             font-weight: 700;
             border-radius: 8px;
+            margin-top: 24px;
             margin-bottom: 18px;
             font-size: 15px;
         }
@@ -243,9 +225,6 @@
         tr:nth-child(even) {
             background-color: #f8fafc;
         }
-        tr:hover {
-            background-color: #f0fdf4;
-        }
         .text-center { text-align: center; }
         .font-bold { font-weight: 700; color: #0f172a; }
     </style>
@@ -258,34 +237,29 @@
             <p>STOCK VALUE TRACKER</p>
         </div>
 
-        <!-- 📊 केवल Sheet 2 और Sheet 3 के बटन -->
         <div class="sheet-tabs" id="sheetTabs" style="display: none;">
             <button class="tab-btn" id="btn-Sheet2" onclick="switchSheet('Sheet2')">Sheet 2</button>
             <button class="tab-btn" id="btn-Sheet3" onclick="switchSheet('Sheet3')">Sheet 3</button>
         </div>
 
-        <!-- 3D एनिमेटेड लोडर -->
         <div id="loader-overlay" class="loader-container">
             <div class="spinner-3d"></div>
             <div class="loader-text">Loading database configuration...</div>
         </div>
 
         <div id="app-content" style="display: none;">
-            <!-- Filter 1: Product Category -->
             <div class="filter-group">
                 <select id="categorySelect">
                     <option value="">-- SELECT PRODUCT CATEGORY --</option>
                 </select>
             </div>
 
-            <!-- Filter 2: Company -->
             <div class="filter-group">
                 <select id="companySelect" disabled>
                     <option value="">-- SELECT COMPANY --</option>
                 </select>
             </div>
 
-            <!-- Filter 3: Model Category Dropdown -->
             <div class="filter-group">
                 <select id="modelCatSelect" disabled>
                     <option value="">-- SELECT MODEL CATEGORY --</option>
@@ -294,20 +268,17 @@
 
             <div class="divider">-- OR CONNECTED FILTERS --</div>
 
-            <!-- Filter 4: Dynamic Searchable Input Bar -->
             <div class="filter-group">
                 <div class="search-title" id="searchTitle">QUICK ITEM WISE SEARCH • READY (0)</div>
                 <input type="text" id="itemSearchInput" list="itemOptions" placeholder="Type name here (e.g. 17 iphone)..." disabled autocomplete="off">
                 <datalist id="itemOptions"></datalist>
             </div>
 
-            <!-- Action buttons -->
             <div class="button-group">
                 <button class="btn btn-primary" id="searchBtn">Search Filter</button>
                 <button class="btn btn-secondary" id="resetBtn">Reset All</button>
             </div>
 
-            <!-- Results Section -->
             <div id="resultsSection" style="display: none;">
                 <div class="total-banner">
                     TOTAL OUTSTANDING VALUE: <span id="totalStockLabel">0</span>
@@ -324,7 +295,6 @@
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
-                            <!-- Populated dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -369,7 +339,6 @@
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
             
-            // एनिमेटेड टेक्स्ट अपडेट
             const textElement = loaderOverlay.querySelector('.loader-text');
             if(textElement) textElement.innerText = `🔄 Syncing details from ${sheetName}...`;
             
@@ -381,7 +350,6 @@
                 const response = await fetch(`${BASE_API_URL}?sheet=${sheetName}`);
                 const json = await response.json();
                 
-                // 🛠️ फ़िल्टर रूल: केवल वही डेटा लें जिसका TOTAL STOCK / TOTAL OUTSTANDING 0 से ज़्यादा हो
                 const allRows = json.rows || [];
                 rawData = allRows.filter(row => {
                     const stockVal = parseInt(row["TOTAL STOCK"] || row["TOTAL OUTSTANDING"]) || 0;
@@ -418,13 +386,6 @@
             
             categories.forEach(cat => {
                 const option = new Option(cat, cat);
-                const upperCat = cat.toUpperCase().trim();
-                
-                if (upperCat === "SMART MOBILE" || upperCat === "TABLET") {
-                    option.style.backgroundColor = "#e3f2fd"; 
-                    option.style.color = "#2e7d32";           
-                    option.style.fontWeight = "bold";
-                }
                 categorySelect.add(option);
             });
 
