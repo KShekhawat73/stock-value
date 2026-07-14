@@ -45,7 +45,6 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        /* Style for the Last Updated dynamic date indicator string */
         .update-timestamp {
             font-size: 13px;
             font-style: italic;
@@ -85,6 +84,15 @@
         .filter-group {
             margin-bottom: 18px;
         }
+        .filter-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+            letter-spacing: 0.5px;
+        }
         select {
             width: 100%;
             padding: 14px 18px;
@@ -96,6 +104,8 @@
             box-sizing: border-box;
             outline: none;
             transition: all 0.2s ease-in-out;
+        }
+        select:not([multiple]) {
             appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
@@ -103,8 +113,25 @@
             background-position: right 18px center;
             cursor: pointer;
         }
+        select[multiple] {
+            height: 110px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
         select:focus {
             border-color: #94a3b8;
+        }
+        select:disabled {
+            background-color: #f8fafc;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+        }
+        .hint-text {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+            display: block;
         }
         
         .button-group {
@@ -166,10 +193,7 @@
             padding: 10px 8px;
             font-weight: 700;
             color: #0b3c5d;
-            background-color: #d9e1f2; /* Highlighted Column Headers Row */
-            text-align: left;
-        }
-        th.col-center {
+            background-color: #d9e1f2;
             text-align: left;
         }
         
@@ -179,7 +203,7 @@
             color: #2c3e50;
             vertical-align: middle;
             background-color: #ffffff;
-            text-align: left; /* Shifted to Left Alignment */
+            text-align: left;
         }
         .td-category {
             font-weight: 700;
@@ -190,7 +214,6 @@
             font-weight: 600;
         }
 
-        /* Highlight special criteria product categories */
         .highlight-row td {
             background-color: #e0f2fe !important; 
             color: #16a34a !important;            
@@ -200,14 +223,13 @@
             color: #16a34a !important;
         }
 
-        /* Customized light orange total layout footer style */
         .tr-total td {
             font-weight: 800;
             font-size: 14px;
             border-top: 2px solid #2c3e50;
             border-bottom: 2px solid #2c3e50;
             padding: 12px 8px;
-            background-color: #fce4d6 !important; /* Light Orange Background Highlight */
+            background-color: #fce4d6 !important;
             color: #000000 !important;
             text-align: left;
         }
@@ -233,9 +255,18 @@
 
         <div id="app-content" style="display: none;">
             <div class="filter-group">
+                <label class="filter-label" for="storeSelect">Store Name</label>
                 <select id="storeSelect">
                     <option value="">-- SELECT STORE NAME --</option>
                 </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="categorySelect">Product Category</label>
+                <select id="categorySelect" multiple disabled>
+                    <option value="ALL" selected>-- ALL CATEGORIES --</option>
+                </select>
+                <small class="hint-text">Hold Ctrl (or Cmd) to select multiple specific categories.</small>
             </div>
 
             <div class="button-group">
@@ -252,8 +283,8 @@
                             </tr>
                             <tr>
                                 <th>PRODUCT CATEGORY</th>
-                                <th class="col-center">VOLUME</th>
-                                <th class="col-center">VALUE</th>
+                                <th>VOLUME</th>
+                                <th>VALUE</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
@@ -270,6 +301,7 @@
         let rawRows = [];
 
         const storeSelect = document.getElementById('storeSelect');
+        const categorySelect = document.getElementById('categorySelect');
         const searchBtn = document.getElementById('searchBtn');
         const resetBtn = document.getElementById('resetBtn');
         const resultsSection = document.getElementById('resultsSection');
@@ -293,7 +325,6 @@
                 loaderOverlay.style.display = 'none';
                 appContent.style.display = 'block';
 
-                // Setup default timestamp information
                 setTimestampDisplay();
                 initializeStoreDropdown();
             } catch (error) {
@@ -304,7 +335,6 @@
         }
 
         function setTimestampDisplay() {
-            // Evaluated format matches 14-07-2026 accurately
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -325,12 +355,39 @@
             });
         }
 
+        // Dynamically populates the Category list when a specific store is selected
+        function updateCategoryDropdown() {
+            const selectedStore = storeSelect.value;
+            
+            if (!selectedStore) {
+                categorySelect.innerHTML = '<option value="ALL" selected>-- ALL CATEGORIES --</option>';
+                categorySelect.disabled = true;
+                return;
+            }
+
+            // Get categories that have valid values for the selected store
+            const availableCategories = [...new Set(
+                rawRows.filter(row => String(row["STORE NAME"]).trim() === selectedStore.trim())
+                       .map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
+            )].filter(Boolean).sort();
+
+            categorySelect.innerHTML = '<option value="ALL" selected>-- ALL CATEGORIES --</option>';
+            availableCategories.forEach(cat => {
+                categorySelect.add(new Option(cat, cat));
+            });
+            categorySelect.disabled = false;
+        }
+
         function generateStoreReport() {
             const selectedStore = storeSelect.value;
             if (!selectedStore) {
                 alert("Please select a Store Name first.");
                 return;
             }
+
+            // Capture all selected items from the multi-select box
+            const selectedCategories = Array.from(categorySelect.selectedOptions).map(opt => opt.value);
+            const isAllSelected = selectedCategories.includes("ALL");
 
             tableMainHeader.innerText = selectedStore;
 
@@ -342,6 +399,10 @@
                 if (String(row["STORE NAME"]).trim() !== selectedStore.trim()) return;
 
                 const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
+                
+                // Skip if a specific category target filter condition isn't matched
+                if (!isAllSelected && !selectedCategories.includes(category)) return;
+
                 const volume = parseInt(row["VOLUME"]) || 0;
                 const value = parseFloat(row["VALUE"]) || 0;
 
@@ -363,7 +424,7 @@
             const sortedCategories = Object.keys(summaryMap).sort();
 
             if (sortedCategories.length === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No records found for this store.</td></tr>`;
+                inventoryTableBody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:#999; padding: 20px;">No matching records found for this selection.</td></tr>`;
                 resultsSection.style.display = 'block';
                 return;
             }
@@ -384,7 +445,6 @@
                 inventoryTableBody.appendChild(row);
             });
 
-            // Append structured light orange highlight total layout summaries row
             const totalRow = document.createElement('tr');
             totalRow.className = "tr-total";
             totalRow.innerHTML = `
@@ -400,12 +460,21 @@
 
         function resetApp() {
             storeSelect.value = "";
+            updateCategoryDropdown();
             resultsSection.style.display = 'none';
         }
 
+        storeSelect.addEventListener('change', () => {
+            updateCategoryDropdown();
+            resultsSection.style.display = 'none';
+        });
+
+        categorySelect.addEventListener('change', () => {
+            resultsSection.style.display = 'none';
+        });
+
         searchBtn.addEventListener('click', generateStoreReport);
         resetBtn.addEventListener('click', resetApp);
-        storeSelect.addEventListener('change', () => { resultsSection.style.display = 'none'; });
 
         loadData();
     </script>
