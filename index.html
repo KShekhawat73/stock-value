@@ -45,6 +45,16 @@
             font-weight: 600;
             text-transform: uppercase;
         }
+        /* Style for the Last Updated dynamic date indicator string */
+        .update-timestamp {
+            font-size: 13px;
+            font-style: italic;
+            color: #2979ff;
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
 
         .loader-container {
             display: flex;
@@ -149,66 +159,61 @@
             text-align: center;
             padding: 10px;
             border: 1px solid #cbd5e1;
+            text-transform: uppercase;
         }
         th {
             border: 1px solid #cbd5e1;
-            padding: 10px 6px;
+            padding: 10px 8px;
             font-weight: 700;
-            color: #475569;
-            background-color: #f8fafc;
-            text-align: center;
+            color: #0b3c5d;
+            background-color: #d9e1f2; /* Highlighted Column Headers Row */
+            text-align: left;
         }
-        th.col-comp { text-align: left; padding-left: 10px; }
+        th.col-center {
+            text-align: left;
+        }
         
         td {
-            padding: 10px 6px;
+            padding: 10px 8px;
             border: 1px solid #cbd5e1;
             color: #2c3e50;
             vertical-align: middle;
             background-color: #ffffff;
+            text-align: left; /* Shifted to Left Alignment */
         }
         .td-category {
             font-weight: 700;
             text-transform: uppercase;
-            padding-left: 10px;
         }
         
         .data-cell {
-            text-align: right;
-            padding-right: 10px;
             font-weight: 600;
         }
 
-        /* Highlight special product classes */
+        /* Highlight special criteria product categories */
         .highlight-row td {
-            background-color: #e0f2fe !important; /* Light Blue */
-            color: #16a34a !important;            /* Green Text */
+            background-color: #e0f2fe !important; 
+            color: #16a34a !important;            
         }
         .highlight-row .td-category {
             background-color: #e0f2fe !important;
             color: #16a34a !important;
         }
 
-        /* Clean table total styles without color headers */
+        /* Customized light orange total layout footer style */
         .tr-total td {
             font-weight: 800;
-            font-style: italic; /* Italic highlighted text */
             font-size: 14px;
             border-top: 2px solid #2c3e50;
             border-bottom: 2px solid #2c3e50;
-            padding: 12px 6px;
-            background-color: #ffffff;
+            padding: 12px 8px;
+            background-color: #fce4d6 !important; /* Light Orange Background Highlight */
+            color: #000000 !important;
+            text-align: left;
         }
         .total-label {
-            text-align: center;
-        }
-        .total-stock-val {
-            text-align: right;
-            padding-right: 10px;
-        }
-        .total-price-val {
-            text-align: right;
-            padding-right: 10px;
+            text-align: center !important;
+            font-style: italic;
         }
     </style>
 </head>
@@ -218,6 +223,7 @@
         <div class="brand-logo">
             <h1>SiVMOR VALUE</h1>
             <p>STOCK VALUE TRACKER</p>
+            <div class="update-timestamp" id="lastUpdatedBox">Last Updated at --</div>
         </div>
 
         <div id="loader-overlay" class="loader-container">
@@ -245,9 +251,9 @@
                                 <th colspan="3" class="table-header-main" id="tableMainHeader">STORE DATA VIEW</th>
                             </tr>
                             <tr>
-                                <th class="col-comp">PRODUCT CATEGORY</th>
-                                <th>VOLUME</th>
-                                <th>VALUE</th>
+                                <th>PRODUCT CATEGORY</th>
+                                <th class="col-center">VOLUME</th>
+                                <th class="col-center">VALUE</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
@@ -271,6 +277,7 @@
         const tableMainHeader = document.getElementById('tableMainHeader');
         const loaderOverlay = document.getElementById('loader-overlay');
         const appContent = document.getElementById('app-content');
+        const lastUpdatedBox = document.getElementById('lastUpdatedBox');
 
         async function loadData() {
             appContent.style.display = 'none';
@@ -286,12 +293,24 @@
                 loaderOverlay.style.display = 'none';
                 appContent.style.display = 'block';
 
+                // Setup default timestamp information
+                setTimestampDisplay();
                 initializeStoreDropdown();
             } catch (error) {
                 console.error(error);
                 const textElement = loaderOverlay.querySelector('.loader-text');
                 if(textElement) textElement.innerHTML = "<span style='color:#e74c3c;'>❌ Failed to load dataset from Sheet3.</span>";
             }
+        }
+
+        function setTimestampDisplay() {
+            // Evaluated format matches 14-07-2026 accurately
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            
+            lastUpdatedBox.innerText = `Last Updated at ${day}-${month}-${year}`;
         }
 
         function formatIndianCurrency(num) {
@@ -353,7 +372,6 @@
                 const data = summaryMap[category];
                 const row = document.createElement('tr');
                 
-                // Add conditional row highlighting classes for specified categories
                 if (category === "SMART MOBILE" || category === "TABLET") {
                     row.className = "highlight-row";
                 }
@@ -366,7 +384,7 @@
                 inventoryTableBody.appendChild(row);
             });
 
-            // Append structured Total Footers (Values are completely rounded off)
+            // Append structured light orange highlight total layout summaries row
             const totalRow = document.createElement('tr');
             totalRow.className = "tr-total";
             totalRow.innerHTML = `
