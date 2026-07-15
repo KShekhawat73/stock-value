@@ -390,8 +390,8 @@
     </div>
 
     <script>
-        // आपके पब्लिश्ड लिंक को डायरेक्ट स्टेबल CSV एंडपॉइंट में बदल दिया गया है
-        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?gid=1476807588&single=true&output=csv";
+        // आपके पब्लिश्ड टोकन के आधार पर सीधा डेटा फ़ीड इंजन लिंक सेट कर दिया गया है
+        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?output=csv";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -422,7 +422,7 @@
         storeComboBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             categoryComboDropdown.classList.remove('show');
-            storeComboDropdown.toggle('show');
+            storeComboDropdown.classList.toggle('show');
         });
 
         categoryComboBtn.addEventListener('click', (e) => {
@@ -455,11 +455,11 @@
             }
 
             try {
-                // कैशे बायपास करने के लिए रियल-टाइम टाइमस्टैम्प आईडी
+                // टाइमस्टैम्प कैशे बायपासर मैकेनिज्म
                 const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
                 const response = await fetch(cacheBusterUrl);
                 
-                if (!response.ok) throw new Error("Network issue");
+                if (!response.ok) throw new Error("Sync Failed");
                 
                 const csvText = await response.text();
                 rawRows = parseCSV(csvText);
@@ -467,7 +467,7 @@
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
-                console.error("CSV Connection Error: ", error);
+                console.error("Data Engine Connection Error: ", error);
                 loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>कृपया ब्राउज़र रीफ़्रेश करें या 🔄 बटन दबाएं।</small></span>";
             }
         }
@@ -533,7 +533,6 @@
             lastUpdatedBox.innerText = `Last Updated at ${day}-${month}-${year}`;
         }
 
-        // करेंसी फॉर्मेट फिक्स
         function formatIndianCurrency(num) {
             return '₹ ' + Number(num).toLocaleString('en-IN');
         }
