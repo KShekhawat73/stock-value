@@ -390,7 +390,7 @@
     </div>
 
     <script>
-        // आपके पब्लिश्ड यूआरएल को सीधे डेटा (CSV Engine) फॉर्मेट में बदला गया है
+        // आपके पब्लिश्ड लिंक को डायरेक्ट स्टेबल CSV एंडपॉइंट में बदल दिया गया है
         const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?gid=1476807588&single=true&output=csv";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
@@ -422,7 +422,7 @@
         storeComboBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             categoryComboDropdown.classList.remove('show');
-            storeComboDropdown.classList.toggle('show');
+            storeComboDropdown.toggle('show');
         });
 
         categoryComboBtn.addEventListener('click', (e) => {
@@ -455,7 +455,7 @@
             }
 
             try {
-                // कैशे बायपास के लिए नया टाइमस्टैम्प आईडी
+                // कैशे बायपास करने के लिए रियल-टाइम टाइमस्टैम्प आईडी
                 const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
                 const response = await fetch(cacheBusterUrl);
                 
@@ -468,7 +468,7 @@
                 renderAppContent();
             } catch (error) {
                 console.error("CSV Connection Error: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>कृपया पक्का करें कि शीट 'Publish to the Web' हो चुकी है।</small></span>";
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>कृपया ब्राउज़र रीफ़्रेश करें या 🔄 बटन दबाएं।</small></span>";
             }
         }
 
@@ -533,6 +533,7 @@
             lastUpdatedBox.innerText = `Last Updated at ${day}-${month}-${year}`;
         }
 
+        // करेंसी फॉर्मेट फिक्स
         function formatIndianCurrency(num) {
             return '₹ ' + Number(num).toLocaleString('en-IN');
         }
