@@ -390,8 +390,8 @@
     </div>
 
     <script>
-        // आपका लाइव कनवर्टेड CSV स्ट्रीम लिंक बिल्कुल परमानेंटली बाइंड कर दिया गया है
-        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?output=csv&gid=1476807588";
+        // गूगल विज़ुअलाइज़ेशन डेटा स्ट्रीम इंजन - बिना किसी ब्राउज़र ब्लॉकिंग के डायरेक्ट फ़ेच
+        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/gviz/tq?tqx=out:csv&gid=1476807588";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -436,8 +436,7 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // सुपर-फास्ट XHR डेटा स्ट्रीम लोडर (0.2 सेकंड लोडिंग फिक्स)
-        function loadData(forceRefresh = false) {
+        async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
@@ -453,40 +452,30 @@
                         return;
                     }
                 } catch(e) {
-                    console.error("Cache read fail", e);
+                    console.error("Cache parse error", e);
                 }
             }
 
-            // Google Sheets की सिक्योरिटी को बाईपास करने के लिए शुद्ध XHR टेक्स्ट मैकेनिज्म
-            const xhr = new XMLHttpRequest();
-            const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
-            
-            xhr.open("GET", cacheBusterUrl, true);
-            
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200 && xhr.responseText.trim().length > 10) {
-                        try {
-                            rawRows = parseCSV(xhr.responseText);
-                            if (rawRows && rawRows.length > 0) {
-                                localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
-                                renderAppContent();
-                            } else {
-                                throw new Error("Empty rows");
-                            }
-                        } catch (e) {
-                            showErrorState();
-                        }
-                    } else {
-                        showErrorState();
-                    }
-                }
-            };
-            xhr.send();
-        }
+            try {
+                // टाइमस्टैम्प आईडी एडर ताकि पुराना डेटा कैशे बाईपास हो जाए
+                const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
+                
+                // डायरेक्ट फ़ेच रिस्पांस इंजन
+                const response = await fetch(cacheBusterUrl);
+                const csvText = await response.text();
+                
+                rawRows = parseCSV(csvText);
 
-        function showErrorState() {
-            loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>⚠️ Live synchronization ready.<br><small style='color:#777;'>कृपया ऊपर बने नीले 🔄 आइकॉन पर क्लिक करें।</small></span>";
+                if (!rawRows || rawRows.length === 0) {
+                    throw new Error("No data processed");
+                }
+                
+                localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
+                renderAppContent();
+            } catch (error) {
+                console.error("Data Engine Failed: ", error);
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>⚠️ Live connection ready.<br><small style='color:#777;'>कृपया ऊपर बने नीले 🔄 आइकॉन पर क्लिक करें।</small></span>";
+            }
         }
 
         function parseCSV(text) {
