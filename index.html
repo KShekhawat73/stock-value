@@ -390,7 +390,7 @@
     </div>
 
     <script>
-        // लाइन 203: अपना नया डिप्लॉयड Apps Script Web App URL यहाँ पेस्ट करें
+        // आपका नया जेनरेटेड Web App URL यहाँ सफलतापूर्वक लिंक कर दिया गया है
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbx-vPOZZrTcxKxBM51jHiRoovK7Wnr9Qj8wDnoR__YwjNPwUZVy8WD_8Ro_ErtnFmwd/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
@@ -457,7 +457,6 @@
             }
 
             try {
-                // शुद्ध बिना हेडर की फ्रेश फ़ेच रिक्वेस्ट (रीडायरेक्शन 'follow' के साथ)
                 const cacheBusterUrl = `${BASE_API_URL}&_ts=${new Date().getTime()}`;
                 const response = await fetch(cacheBusterUrl, {
                     method: "GET",
