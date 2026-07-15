@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
-    <!-- तेज़ और साफ़ स्क्रीनशॉट कैप्चर करने के लिए लाइब्रेरी -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -217,7 +216,6 @@
             background-color: #e2e8f0;
         }
 
-        /* शेयर टूल्स बटन स्टाइल */
         .action-share-panel {
             display: flex;
             justify-content: flex-end;
@@ -392,7 +390,8 @@
     </div>
 
     <script>
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbExUmq8aAZ7G3bxWUG0PM6tRHI1hY_hpSqj_qonGLsHfm7EwUlWtcaUOn4V4DWzp-p/exec?sheet=Sheet3";
+        // आपका नया Fresh Deployment URL यहाँ सफलतापूर्वक लिंक कर दिया गया है
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbx-vPOZZrTcxKxBM51jHiRoovK7Wnr9Qj8wDnoR__YwjNPwUZVy8WD_8Ro_ErtnFmwd/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -437,7 +436,6 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (रीडायरेक्ट और CORS फिक्स के साथ)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -452,13 +450,12 @@
                     renderAppContent();
                     return;
                 } catch(e) {
-                    console.error("Cache read error, fetching live...", e);
+                    console.error("Cache read error", e);
                 }
             }
 
             try {
-                // बिना किसी कस्टम हेडर के साफ़ रिक्वेस्ट भेजें (CORS ब्लॉक से बचने के लिए)
-                const cacheBusterUrl = `${BASE_API_URL}&_cb=${new Date().getTime()}`;
+                const cacheBusterUrl = `${BASE_API_URL}${BASE_API_URL.includes('?') ? '&' : '?'}_cb=${new Date().getTime()}`;
                 
                 const response = await fetch(cacheBusterUrl, {
                     method: "GET",
