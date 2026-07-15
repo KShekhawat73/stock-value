@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
+    <!-- तेज़ और साफ़ स्क्रीनशॉट कैप्चर करने के लिए लाइब्रेरी -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -96,6 +97,7 @@
             font-size: 13px;
             font-weight: 600;
             color: #64748b;
+            text-align: center;
         }
 
         .filter-group {
@@ -328,7 +330,7 @@
 
         <div id="loader-overlay" class="loader-container">
             <div class="spinner-3d"></div>
-            <div class="loader-text">Loading database configuration...</div>
+            <div class="loader-text" id="loaderTextStatus">Loading database configuration...</div>
         </div>
 
         <div id="app-content" style="display: none;">
@@ -414,6 +416,7 @@
         const inventoryTableBody = document.getElementById('inventoryTableBody');
         const tableMainHeader = document.getElementById('tableMainHeader');
         const loaderOverlay = document.getElementById('loader-overlay');
+        const loaderTextStatus = document.getElementById('loaderTextStatus');
         const appContent = document.getElementById('app-content');
         const lastUpdatedBox = document.getElementById('lastUpdatedBox');
 
@@ -434,11 +437,12 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (विथ फ़ोर्स रीफ़्रेश ऑटोमेशन)
+        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (रीडायरेक्ट फिक्स के साथ)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
+            loaderTextStatus.innerHTML = "Loading database configuration...";
             
             const cachedData = localStorage.getItem(CACHE_KEY);
 
@@ -453,18 +457,26 @@
             }
 
             try {
-                // कैशे एरर बायपास करने के लिए टाइमस्टैम्प जनरेटर आईडी जोड़ा गया
+                // रीडायरेक्ट एरर को रोकने के लिए redirect: "follow" और मोड "cors" होना ज़रूरी है
                 const cacheBusterUrl = `${BASE_API_URL}&_cb=${new Date().getTime()}`;
-                const response = await fetch(cacheBusterUrl);
+                
+                const response = await fetch(cacheBusterUrl, {
+                    method: "GET",
+                    mode: "cors",
+                    redirect: "follow", 
+                    headers: {
+                        "Content-Type": "text/plain"
+                    }
+                });
+                
                 const json = await response.json();
                 rawRows = json.rows || [];
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
-                console.error(error);
-                const textElement = loaderOverlay.querySelector('.loader-text');
-                if(textElement) textElement.innerHTML = "<span style='color:#e74c3c;'>❌ Failed to load dataset from Sheet3.<br><small style='color:#777;'>Please try clicking the 🔄 icon above.</small></span>";
+                console.error("Fetch major failure: ", error);
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Connection blocked or timeout.<br><small style='color:#777;'>Please click the 🔄 icon above to force reload.</small></span>";
             }
         }
 
