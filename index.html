@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -26,249 +28,36 @@
             box-sizing: border-box;
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
-        .brand-logo {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .brand-logo h1 {
-            margin: 0;
-            font-size: 26px;
-            color: #0b3c5d;
-            letter-spacing: 0.5px;
-            font-weight: 800;
-        }
-        .brand-logo p {
-            margin: 6px 0 0 0;
-            font-size: 11px;
-            color: #8a99ad;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .update-timestamp {
-            font-size: 13px;
-            font-style: italic;
-            color: #2979ff;
-            text-align: center;
-            margin-top: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .loader-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 0;
-        }
-        .spinner-3d {
-            width: 44px;
-            height: 44px;
-            border: 5px solid #e2e8f0;
-            border-top: 5px solid #15803d;
-            border-radius: 50%;
-            animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        @keyframes spin3d {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loader-text {
-            margin-top: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .filter-group {
-            margin-bottom: 18px;
-            position: relative;
-        }
-        .filter-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            display: block;
-            letter-spacing: 0.5px;
-        }
-        select, .combo-box-btn {
-            width: 100%;
-            padding: 14px 18px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: #fff;
-            color: #1e293b;
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.2s ease-in-out;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-        }
-        .combo-box-btn::after {
-            content: "";
-            width: 14px;
-            height: 14px;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        /* Custom Multi-select Dropdown styles */
-        .combo-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            margin-top: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            padding: 4px 0;
-        }
-        .combo-dropdown.show {
-            display: block;
-        }
-        .combo-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 13px;
-            user-select: none;
-        }
-        .combo-item:hover {
-            background-color: #f1f5f9;
-        }
-        .combo-item input[type="checkbox"] {
-            margin-right: 10px;
-            width: 16px;
-            height: 16px;
-            accent-color: #15803d;
-            cursor: pointer;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 14px;
-            margin-top: 25px;
-        }
-        .btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.15s ease;
-            outline: none;
-        }
-        .btn-primary {
-            background-color: #15803d;
-            color: white;
-        }
-        .btn-primary:hover:not(:disabled) {
-            background-color: #166534;
-        }
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-        
-        .table-container {
-            width: 100%;
-            margin-top: 25px;
-            border: 1px solid #cbd5e1;
-            background-color: #fff;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .table-header-main {
-            background-color: #f8fafc;
-            color: #0b3c5d;
-            font-weight: 800;
-            font-size: 15px;
-            text-align: center;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            text-transform: uppercase;
-        }
-        th {
-            border: 1px solid #cbd5e1;
-            padding: 10px 8px;
-            font-weight: 700;
-            color: #0b3c5d;
-            background-color: #d9e1f2;
-            text-align: left;
-        }
-        
-        td {
-            padding: 10px 8px;
-            border: 1px solid #cbd5e1;
-            color: #2c3e50;
-            vertical-align: middle;
-            background-color: #ffffff;
-            text-align: left;
-        }
-        .td-category {
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .data-cell {
-            font-weight: 600;
-        }
-
-        .highlight-row td {
-            background-color: #e0f2fe !important; 
-            color: #16a34a !important;            
-        }
-        .highlight-row .td-category {
-            background-color: #e0f2fe !important;
-            color: #16a34a !important;
-        }
-
-        .tr-total td {
-            font-weight: 800;
-            font-size: 14px;
-            border-top: 2px solid #2c3e50;
-            border-bottom: 2px solid #2c3e50;
-            padding: 12px 8px;
-            background-color: #fce4d6 !important;
-            color: #000000 !important;
-            text-align: left;
-        }
-        .total-label {
-            text-align: center !important;
-            font-style: italic;
-        }
+        .brand-logo { text-align: center; margin-bottom: 25px; }
+        .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; letter-spacing: 0.5px; font-weight: 800; }
+        .brand-logo p { margin: 6px 0 0 0; font-size: 11px; color: #8a99ad; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; }
+        .update-timestamp { font-size: 13px; font-style: italic; color: #2979ff; text-align: center; margin-top: 8px; margin-bottom: 20px; font-weight: 500; }
+        .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; }
+        .spinner-3d { width: 44px; height: 44px; border: 5px solid #e2e8f0; border-top: 5px solid #15803d; border-radius: 50%; animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes spin3d { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { margin-top: 20px; font-size: 13px; font-weight: 600; color: #64748b; }
+        .filter-group { margin-bottom: 18px; position: relative; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+        select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; color: #1e293b; box-sizing: border-box; outline: none; transition: all 0.2s ease-in-out; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .combo-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 4px 0; }
+        .combo-dropdown.show { display: block; }
+        .combo-item { display: flex; align-items: center; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+        .combo-item:hover { background-color: #f1f5f9; }
+        .combo-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #15803d; cursor: pointer; }
+        .button-group { display: flex; gap: 14px; margin-top: 25px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s ease; }
+        .btn-primary { background-color: #15803d; color: white; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .table-container { width: 100%; margin-top: 25px; border: 1px solid #cbd5e1; background-color: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .table-header-main { background-color: #f8fafc; color: #0b3c5d; font-weight: 800; font-size: 15px; text-align: center; padding: 10px; border: 1px solid #cbd5e1; text-transform: uppercase; }
+        th { border: 1px solid #cbd5e1; padding: 10px 8px; font-weight: 700; color: #0b3c5d; background-color: #d9e1f2; text-align: left; }
+        td { padding: 10px 8px; border: 1px solid #cbd5e1; color: #2c3e50; background-color: #ffffff; text-align: left; }
+        .td-category { font-weight: 700; text-transform: uppercase; }
+        .data-cell { font-weight: 600; }
+        .highlight-row td { background-color: #e0f2fe !important; color: #16a34a !important; }
+        .tr-total td { font-weight: 800; border-top: 2px solid #2c3e50; padding: 12px 8px; background-color: #fce4d6 !important; color: #000000 !important; }
+        .total-label { text-align: center !important; font-style: italic; }
     </style>
 </head>
 <body>
@@ -282,15 +71,14 @@
 
         <div id="loader-overlay" class="loader-container">
             <div class="spinner-3d"></div>
-            <div class="loader-text">Loading database configuration...</div>
+            <div class="loader-text">Loading database...</div>
         </div>
 
         <div id="app-content" style="display: none;">
-            
             <div class="filter-group">
-                <label class="filter-label" for="categoryTypeSelect">Store Category</label>
+                <label class="filter-label">Store Category</label>
                 <select id="categoryTypeSelect">
-                    <option value="ALL" selected>-- ALL CATEGORIES --</option>
+                    <option value="ALL">-- ALL CATEGORIES --</option>
                     <option value="FRANCHISE">FRANCHISE</option>
                     <option value="OWNED">OWNED</option>
                 </select>
@@ -310,24 +98,22 @@
 
             <div class="button-group">
                 <button class="btn btn-primary" id="searchBtn">Search Filter</button>
-                <button class="btn btn-secondary" id="resetBtn">Reset All</button>
+                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+            </div>
+
+            <div class="button-group" id="actionButtons" style="display: none;">
+                <button class="btn btn-secondary" onclick="downloadExcel()" style="background-color: #dcfce7; border-color: #bbf7d0;">📥 Excel</button>
+                <button class="btn btn-secondary" onclick="copyScreenshot()" style="background-color: #dbeafe; border-color: #bfdbfe;">📸 Screenshot</button>
             </div>
 
             <div id="resultsSection" style="display: none;">
                 <div class="table-container">
                     <table>
                         <thead>
-                            <tr>
-                                <th colspan="3" class="table-header-main" id="tableMainHeader">STORE DATA VIEW</th>
-                            </tr>
-                            <tr>
-                                <th>PRODUCT CATEGORY</th>
-                                <th>VOLUME</th>
-                                <th>VALUE</th>
-                            </tr>
+                            <tr><th colspan="3" class="table-header-main" id="tableMainHeader">STORE DATA</th></tr>
+                            <tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr>
                         </thead>
-                        <tbody id="inventoryTableBody">
-                        </tbody>
+                        <tbody id="inventoryTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -336,316 +122,98 @@
 
     <script>
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec?sheet=Sheet3";
-
-        let rawRows = [];
-        let selectedStores = ["ALL"];
-        let selectedCategories = ["ALL"];
+        let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
 
         const categoryTypeSelect = document.getElementById('categoryTypeSelect');
         const storeComboBtn = document.getElementById('storeComboBtn');
         const storeComboDropdown = document.getElementById('storeComboDropdown');
         const categoryComboBtn = document.getElementById('categoryComboBtn');
         const categoryComboDropdown = document.getElementById('categoryComboDropdown');
-        
-        const searchBtn = document.getElementById('searchBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const resultsSection = document.getElementById('resultsSection');
-        const inventoryTableBody = document.getElementById('inventoryTableBody');
-        const tableMainHeader = document.getElementById('tableMainHeader');
-        const loaderOverlay = document.getElementById('loader-overlay');
-        const appContent = document.getElementById('app-content');
-        const lastUpdatedBox = document.getElementById('lastUpdatedBox');
 
-        // Toggle dropdowns open/close
-        storeComboBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            categoryComboDropdown.classList.remove('show');
-            storeComboDropdown.classList.toggle('show');
-        });
-
-        categoryComboBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            storeComboDropdown.classList.remove('show');
-            categoryComboDropdown.classList.toggle('show');
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', () => {
-            storeComboDropdown.classList.remove('show');
-            categoryComboDropdown.classList.remove('show');
-        });
+        // Toggle dropdowns
+        storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
+        categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
+        document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
 
         async function loadData() {
-            appContent.style.display = 'none';
-            resultsSection.style.display = 'none';
-            loaderOverlay.style.display = 'flex';
-            
             try {
                 const response = await fetch(BASE_API_URL);
                 const json = await response.json();
-                
                 rawRows = json.rows || [];
-
-                loaderOverlay.style.display = 'none';
-                appContent.style.display = 'block';
-
-                setTimestampDisplay();
+                document.getElementById('loader-overlay').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
                 updateStoreDropdown();
                 updateCategoryDropdown();
-            } catch (error) {
-                console.error(error);
-                const textElement = loaderOverlay.querySelector('.loader-text');
-                if(textElement) textElement.innerHTML = "<span style='color:#e74c3c;'>❌ Failed to load dataset from Sheet3.</span>";
-            }
+            } catch (error) { console.error(error); }
         }
 
-        function setTimestampDisplay() {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const year = today.getFullYear();
-            lastUpdatedBox.innerText = `Last Updated at ${day}-${month}-${year}`;
-        }
+        function formatIndianCurrency(num) { return '₹ ' + Number(num).toLocaleString('en-IN'); }
 
-        function formatIndianCurrency(num) {
-            return '₹ ' + Number(num).toLocaleString('en-IN');
-        }
-
-        // Dynamically populates Store Names checkboxes based on selected Store Category Type
         function updateStoreDropdown() {
-            const selectedType = categoryTypeSelect.value;
+            const type = categoryTypeSelect.value;
+            const stores = [...new Set(rawRows.filter(r => type === "ALL" || r["STORE CATEGORY"] === type).map(r => r["STORE NAME"]))].filter(Boolean).sort();
             storeComboDropdown.innerHTML = '';
-            
-            const filteredStores = [...new Set(
-                rawRows.filter(row => {
-                    if (selectedType === "ALL") return true;
-                    return String(row["STORE CATEGORY"] || '').trim().toUpperCase() === selectedType;
-                }).map(row => String(row["STORE NAME"] || '').trim())
-            )].filter(Boolean).sort();
-
-            // Add 'ALL' item
-            createCheckboxItem(storeComboDropdown, "ALL", "-- ALL STORES --", selectedStores, onStoreSelectionChange);
-
-            filteredStores.forEach(store => {
-                createCheckboxItem(storeComboDropdown, store, store, selectedStores, onStoreSelectionChange);
-            });
-
-            updateComboButtonText(storeComboBtn, selectedStores, "-- ALL STORES --");
+            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); }, storeComboDropdown);
+            stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
+                if(c) { selectedStores = selectedStores.filter(i=>i!=="ALL"); selectedStores.push(v); }
+                else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
+                updateStoreDropdown(); updateCategoryDropdown();
+            }, storeComboDropdown));
+            storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
         }
 
-        function onStoreSelectionChange(value, checked) {
-            if (value === "ALL") {
-                selectedStores = checked ? ["ALL"] : [];
-            } else {
-                if (checked) {
-                    selectedStores = selectedStores.filter(item => item !== "ALL");
-                    if (!selectedStores.includes(value)) selectedStores.push(value);
-                } else {
-                    selectedStores = selectedStores.filter(item => item !== value);
-                }
-                if (selectedStores.length === 0) selectedStores = ["ALL"];
-            }
-            
-            // Refresh checkbox states UI
-            refreshCheckboxUI(storeComboDropdown, selectedStores);
-            updateComboButtonText(storeComboBtn, selectedStores, "-- ALL STORES --");
-            
-            // Cascading dynamic updates for category option rules
-            updateCategoryDropdown();
-        }
-
-        // Populates categories based on active choices
         function updateCategoryDropdown() {
-            const selectedType = categoryTypeSelect.value;
-
-            const availableCategories = [...new Set(
-                rawRows.filter(row => {
-                    const matchType = selectedType === "ALL" || String(row["STORE CATEGORY"] || '').trim().toUpperCase() === selectedType;
-                    const matchStore = selectedStores.includes("ALL") || selectedStores.includes(String(row["STORE NAME"]).trim());
-                    const hasStock = (parseInt(row["VOLUME"]) || 0) > 0 || (parseFloat(row["VALUE"]) || 0) > 0;
-                    return matchType && matchStore && hasStock;
-                }).map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
-            )].filter(Boolean).sort();
-
+            const cats = [...new Set(rawRows.filter(r => (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"]))).map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
             categoryComboDropdown.innerHTML = '';
-            
-            createCheckboxItem(categoryComboDropdown, "ALL", "-- ALL CATEGORIES --", selectedCategories, onCategorySelectionChange);
-            
-            availableCategories.forEach(cat => {
-                createCheckboxItem(categoryComboDropdown, cat, cat, selectedCategories, onCategorySelectionChange);
-            });
-
-            // Safeguard selected categories configuration
-            selectedCategories = selectedCategories.filter(cat => cat === "ALL" || availableCategories.includes(cat));
-            if(selectedCategories.length === 0) selectedCategories = ["ALL"];
-
-            refreshCheckboxUI(categoryComboDropdown, selectedCategories);
-            updateComboButtonText(categoryComboBtn, selectedCategories, "-- ALL CATEGORIES --");
+            createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { selectedCategories = c ? ["ALL"] : []; updateCategoryDropdown(); }, categoryComboDropdown);
+            cats.forEach(c => createCheckbox(c, c, selectedCategories, (v, checked) => {
+                if(checked) { selectedCategories = selectedCategories.filter(i=>i!=="ALL"); selectedCategories.push(v); }
+                else { selectedCategories = selectedCategories.filter(i=>i!==v); if(selectedCategories.length===0) selectedCategories=["ALL"]; }
+                updateCategoryDropdown();
+            }, categoryComboDropdown));
+            categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
         }
 
-        function onCategorySelectionChange(value, checked) {
-            if (value === "ALL") {
-                selectedCategories = checked ? ["ALL"] : [];
-            } else {
-                if (checked) {
-                    selectedCategories = selectedCategories.filter(item => item !== "ALL");
-                    if (!selectedCategories.includes(value)) selectedCategories.push(value);
-                } else {
-                    selectedCategories = selectedCategories.filter(item => item !== value);
-                }
-                if (selectedCategories.length === 0) selectedCategories = ["ALL"];
-            }
-
-            refreshCheckboxUI(categoryComboDropdown, selectedCategories);
-            updateComboButtonText(categoryComboBtn, selectedCategories, "-- ALL CATEGORIES --");
-        }
-
-        // Helper components to generate UI logic seamlessly
-        function createCheckboxItem(container, value, labelText, selectionsArray, onChangeCallback) {
-            const div = document.createElement('div');
-            div.className = 'combo-item';
-            div.addEventListener('click', (e) => e.stopPropagation());
-
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.value = value;
-            chk.checked = selectionsArray.includes(value);
-            
-            chk.addEventListener('change', (e) => {
-                onChangeCallback(value, e.target.checked);
-            });
-
-            div.appendChild(chk);
-            
-            const label = document.createElement('label');
-            label.innerText = labelText;
-            label.style.cursor = 'pointer';
-            label.addEventListener('click', () => {
-                chk.checked = !chk.checked;
-                onChangeCallback(value, chk.checked);
-            });
-            
-            div.appendChild(label);
+        function createCheckbox(val, label, arr, callback, container) {
+            const div = document.createElement('div'); div.className = 'combo-item';
+            div.innerHTML = `<input type="checkbox" ${arr.includes(val) ? 'checked' : ''}> ${label}`;
+            div.addEventListener('click', (e) => { callback(val, div.querySelector('input').checked); });
             container.appendChild(div);
         }
 
-        function refreshCheckboxUI(container, selectionsArray) {
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(chk => {
-                chk.checked = selectionsArray.includes(chk.value);
-            });
-        }
-
-        function updateComboButtonText(btn, selectionsArray, allPlaceholder) {
-            if (selectionsArray.includes("ALL")) {
-                btn.innerText = allPlaceholder;
-            } else if (selectionsArray.length === 1) {
-                btn.innerText = selectionsArray[0];
-            } else {
-                btn.innerText = `${selectionsArray.length} Selected`;
-            }
-        }
-
         function generateStoreReport() {
-            const selectedType = categoryTypeSelect.value;
-            
-            // Build text context main dynamic header
-            let headerText = "";
-            if (!selectedStores.includes("ALL")) {
-                headerText = selectedStores.length === 1 ? selectedStores[0] : `${selectedStores.length} STORES SELECTED`;
-            } else if (selectedType !== "ALL") {
-                headerText = `ALL ${selectedType} STORES`;
-            } else {
-                headerText = "ALL STORES DATA";
-            }
-            tableMainHeader.innerText = headerText;
-
-            let summaryMap = {};
-            let grandTotalVolume = 0;
-            let grandTotalValue = 0;
-
-            rawRows.forEach(row => {
-                if (selectedType !== "ALL" && String(row["STORE CATEGORY"] || '').trim().toUpperCase() !== selectedType) return;
-                if (!selectedStores.includes("ALL") && !selectedStores.includes(String(row["STORE NAME"]).trim())) return;
-
-                const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
-                if (!selectedCategories.includes("ALL") && !selectedCategories.includes(category)) return;
-
-                const volume = parseInt(row["VOLUME"]) || 0;
-                const value = parseFloat(row["VALUE"]) || 0;
-
-                if (volume > 0 || value > 0) {
-                    if (!summaryMap[category]) {
-                        summaryMap[category] = { volume: 0, value: 0 };
-                    }
-                    summaryMap[category].volume += volume;
-                    summaryMap[category].value += value;
+            const body = document.getElementById('inventoryTableBody');
+            body.innerHTML = "";
+            let summary = {}, gVol = 0, gVal = 0;
+            rawRows.forEach(r => {
+                if ((selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) && 
+                    (selectedCategories.includes("ALL") || selectedCategories.includes(r["PRODUCT CATEGORY"]))) {
+                    let cat = r["PRODUCT CATEGORY"];
+                    if(!summary[cat]) summary[cat] = {v:0, p:0};
+                    summary[cat].v += parseInt(r["VOLUME"] || 0);
+                    summary[cat].p += parseFloat(r["VALUE"] || 0);
                 }
             });
-
-            Object.values(summaryMap).forEach(c => {
-                grandTotalVolume += c.volume;
-                grandTotalValue += c.value;
+            Object.keys(summary).forEach(k => {
+                gVol += summary[k].v; gVal += summary[k].p;
+                body.innerHTML += `<tr><td class="td-category">${k}</td><td>${summary[k].v}</td><td>${formatIndianCurrency(Math.round(summary[k].p))}</td></tr>`;
             });
-
-            inventoryTableBody.innerHTML = "";
-            const sortedCategories = Object.keys(summaryMap).sort();
-
-            if (sortedCategories.length === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="3" style="color:#999; padding: 20px; text-align: center;">No matching records with active stock found.</td></tr>`;
-                resultsSection.style.display = 'block';
-                return;
-            }
-
-            sortedCategories.forEach(category => {
-                const data = summaryMap[category];
-                const row = document.createElement('tr');
-                
-                if (category === "SMART MOBILE" || category === "TABLET") {
-                    row.className = "highlight-row";
-                }
-
-                row.innerHTML = `
-                    <td class="td-category">${category}</td>
-                    <td class="data-cell">${data.volume}</td>
-                    <td class="data-cell">${formatIndianCurrency(Math.round(data.value))}</td>
-                `;
-                inventoryTableBody.appendChild(row);
-            });
-
-            const totalRow = document.createElement('tr');
-            totalRow.className = "tr-total";
-            totalRow.innerHTML = `
-                <td class="total-label">TOTAL</td>
-                <td class="total-stock-val">${grandTotalVolume}</td>
-                <td class="total-price-val">${formatIndianCurrency(Math.round(grandTotalValue))}</td>
-            `;
-            inventoryTableBody.appendChild(totalRow);
-
-            resultsSection.style.display = 'block';
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            body.innerHTML += `<tr class="tr-total"><td class="total-label">TOTAL</td><td>${gVol}</td><td>${formatIndianCurrency(Math.round(gVal))}</td></tr>`;
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'flex';
         }
 
-        function resetApp() {
-            categoryTypeSelect.value = "ALL";
-            selectedStores = ["ALL"];
-            selectedCategories = ["ALL"];
-            updateStoreDropdown();
-            updateCategoryDropdown();
-            resultsSection.style.display = 'none';
+        // Action Functions
+        function downloadExcel() {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx");
+        }
+        async function copyScreenshot() {
+            const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
+            canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
         }
 
-        categoryTypeSelect.addEventListener('change', () => {
-            selectedStores = ["ALL"];
-            selectedCategories = ["ALL"];
-            updateStoreDropdown();
-            updateCategoryDropdown();
-            resultsSection.style.display = 'none';
-        });
-
-        searchBtn.addEventListener('click', generateStoreReport);
-        resetBtn.addEventListener('click', resetApp);
-
+        document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
+        document.getElementById('resetBtn').addEventListener('click', () => location.reload());
         loadData();
     </script>
 </body>
