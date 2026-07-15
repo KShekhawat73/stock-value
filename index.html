@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
+    <!-- स्क्रीनशॉट कैप्चर करने के लिए लाइब्रेरी -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -390,8 +391,8 @@
     </div>
 
     <script>
-        // आपका नया जेनरेटेड Web App URL यहाँ सफलतापूर्वक लिंक कर दिया गया है
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbx-vPOZZrTcxKxBM51jHiRoovK7Wnr9Qj8wDnoR__YwjNPwUZVy8WD_8Ro_ErtnFmwd/exec?sheet=Sheet3";
+        // आपका नया डिप्लॉयड लिंक (लास्ट में ?sheet=Sheet3 के साथ)
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxIGdL38oD4R4CCSLKZWyME2ay091cVzHR2JEOiOMfoVKvHM_z-99kNcDgaz6kZY9uy/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -436,7 +437,27 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        async function loadData(forceRefresh = false) {
+        // ब्राउज़र CORS ब्लॉकिंग को 100% तोड़ने के लिए JSONP ग्लोबल रिस्पॉन्स हैंडलर
+        window.handleAppsScriptResponse = function(json) {
+            try {
+                // पुराने अवांछित स्क्रिप्ट एलिमेंट्स को डिलीट करना
+                const oldScript = document.getElementById('jsonp-temp-script');
+                if (oldScript) oldScript.remove();
+
+                rawRows = json.rows || [];
+                if (rawRows && rawRows.length > 0) {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
+                    renderAppContent();
+                } else {
+                    showErrorState();
+                }
+            } catch (e) {
+                console.error(e);
+                showErrorState();
+            }
+        };
+
+        function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
@@ -452,26 +473,33 @@
                         return;
                     }
                 } catch(e) {
-                    console.error("Cache parsing error", e);
+                    console.error(e);
                 }
             }
 
-            try {
-                const cacheBusterUrl = `${BASE_API_URL}&_ts=${new Date().getTime()}`;
-                const response = await fetch(cacheBusterUrl, {
-                    method: "GET",
-                    redirect: "follow"
-                });
-                
-                const json = await response.json();
-                rawRows = json.rows || [];
-                
-                localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
-                renderAppContent();
-            } catch (error) {
-                console.error("Data Load Failed: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Sync failed or network timeout.<br><small style='color:#777;'>कृपया ऊपर बने 🔄 आइकॉन पर क्लिक करें।</small></span>";
-            }
+            // JSONP स्क्रिप्ट टैग के जरिए गूगल सिक्योरिटी बाईपास इंजन
+            const script = document.createElement('script');
+            script.id = 'jsonp-temp-script';
+            
+            // Apps Script को बताने के लिए कि वो सुरक्षा घेरा हटाकर डेटा पास करे
+            script.src = `${BASE_API_URL}&prefix=handleAppsScriptResponse&_ts=${new Date().getTime()}`;
+            
+            script.onerror = function() {
+                showErrorState();
+            };
+            
+            document.body.appendChild(script);
+
+            // 8 सेकंड का फॉलबैक टाइमआउट रूल
+            setTimeout(() => {
+                if (rawRows.length === 0 && loaderOverlay.style.display !== 'none') {
+                    showErrorState();
+                }
+            }, 8000);
+        }
+
+        function showErrorState() {
+            loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Connection security blocked.<br><small style='color:#777;'>कृपया ब्राउज़र रीफ़्रेश करें या 🔄 बटन दबाएं।</small></span>";
         }
 
         function renderAppContent() {
