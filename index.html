@@ -390,8 +390,8 @@
     </div>
 
     <script>
-        // आपके पब्लिश्ड टोकन के आधार पर सीधा डेटा फ़ीड इंजन लिंक सेट कर दिया गया है
-        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?output=csv";
+        // डायरेक्ट लाइव CSV डेटा फ़ीड इंजन (पूरी तरह से ऑटो-सिंक्ड)
+        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/pub?output=csv&gid=1476807588";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -447,15 +447,17 @@
             if (!forceRefresh && cachedData) {
                 try {
                     rawRows = JSON.parse(cachedData);
-                    renderAppContent();
-                    return;
+                    if (rawRows && rawRows.length > 0) {
+                        renderAppContent();
+                        return;
+                    }
                 } catch(e) {
                     console.error("Cache parsing error", e);
                 }
             }
 
             try {
-                // टाइमस्टैम्प कैशे बायपासर मैकेनिज्म
+                // रीयल-टाइम डेटा बाईपास करने के लिए टाइमस्टैम्प आईडी जनरेटर
                 const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
                 const response = await fetch(cacheBusterUrl);
                 
@@ -463,12 +465,16 @@
                 
                 const csvText = await response.text();
                 rawRows = parseCSV(csvText);
+
+                if(!rawRows || rawRows.length === 0) {
+                    throw new Error("Google is processing data...");
+                }
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
                 console.error("Data Engine Connection Error: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>कृपया ब्राउज़र रीफ़्रेश करें या 🔄 बटन दबाएं।</small></span>";
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>⚠️ Sheet data is deploying on Google server.<br><small style='color:#777;'>कृपया 10-20 सेकंड रुकें और ऊपर बने 🔄 बटन पर क्लिक करें।</small></span>";
             }
         }
 
@@ -618,6 +624,7 @@
             updateComboButtonText(categoryComboBtn, selectedCategories, "-- ALL CATEGORIES --");
         }
 
+        // चेकबॉक्स जेनरेटर हेल्पर कंपोनेंट
         function createCheckboxItem(container, value, labelText, selectionsArray, onChangeCallback) {
             const div = document.createElement('div');
             div.className = 'combo-item';
@@ -770,6 +777,7 @@
             }
         }
 
+        // एक्सेल शीट डाउनलोडर कंपोनेंट
         function downloadExcel() {
             const table = reportTableContainer.querySelector('table');
             let html = table.outerHTML;
