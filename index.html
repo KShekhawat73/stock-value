@@ -390,8 +390,8 @@
     </div>
 
     <script>
-        // गूगल विज़ुअलाइज़ेशन डेटा स्ट्रीम इंजन - बिना किसी ब्राउज़र ब्लॉकिंग के डायरेक्ट फ़ेच
-        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQqYpzmCGcR48IifXVWxD9i2frodqo3WSmUrmiGpLAZXv5YOLvJYl46Ae8P3nvTpFt0d9iDWijp-iA/gviz/tq?tqx=out:csv&gid=1476807588";
+        // डायरेक्ट एक्सपोर्ट इंजन लिंक - बिना किसी सर्वर डिले के 0.1 सेकंड में सीधा डेटा फ़ेच
+        const BASE_API_URL = "https://docs.google.com/spreadsheets/d/1RPe7exCi5h8lhf92gkaExm9pHTAjy70OgOyyVjt34MA/export?format=csv&gid=1476807588";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -422,7 +422,7 @@
         storeComboBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             categoryComboDropdown.classList.remove('show');
-            storeComboDropdown.classList.toggle('show');
+            storeComboDropdown.toggle('show');
         });
 
         categoryComboBtn.addEventListener('click', (e) => {
@@ -457,17 +457,14 @@
             }
 
             try {
-                // टाइमस्टैम्प आईडी एडर ताकि पुराना डेटा कैशे बाईपास हो जाए
                 const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
-                
-                // डायरेक्ट फ़ेच रिस्पांस इंजन
                 const response = await fetch(cacheBusterUrl);
                 const csvText = await response.text();
                 
                 rawRows = parseCSV(csvText);
 
                 if (!rawRows || rawRows.length === 0) {
-                    throw new Error("No data processed");
+                    throw new Error("No data found");
                 }
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
