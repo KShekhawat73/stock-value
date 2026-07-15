@@ -390,7 +390,6 @@
     </div>
 
     <script>
-        // आपका नया डिप्लॉयड URL यहाँ सेट कर दिया गया है
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbExUmq8aAZ7G3bxWUG0PM6tRHI1hY_hpSqj_qonGLsHfm7EwUlWtcaUOn4V4DWzp-p/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
@@ -435,7 +434,7 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // सुपर-फास्ट लोकलस्टोरेज कैशे लोडिंग
+        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (विथ फ़ोर्स रीफ़्रेश ऑटोमेशन)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -454,7 +453,9 @@
             }
 
             try {
-                const response = await fetch(BASE_API_URL);
+                // कैशे एरर बायपास करने के लिए टाइमस्टैम्प जनरेटर आईडी जोड़ा गया
+                const cacheBusterUrl = `${BASE_API_URL}&_cb=${new Date().getTime()}`;
+                const response = await fetch(cacheBusterUrl);
                 const json = await response.json();
                 rawRows = json.rows || [];
                 
@@ -463,7 +464,7 @@
             } catch (error) {
                 console.error(error);
                 const textElement = loaderOverlay.querySelector('.loader-text');
-                if(textElement) textElement.innerHTML = "<span style='color:#e74c3c;'>❌ Failed to load dataset from Sheet3.</span>";
+                if(textElement) textElement.innerHTML = "<span style='color:#e74c3c;'>❌ Failed to load dataset from Sheet3.<br><small style='color:#777;'>Please try clicking the 🔄 icon above.</small></span>";
             }
         }
 
@@ -692,7 +693,6 @@
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // स्क्रीनशॉट इमेज कॉपी फ़ंक्शनलिटी
         async function copyTableScreenshot() {
             copyScreenshotBtn.innerText = "⏳ Capturing...";
             try {
@@ -724,7 +724,6 @@
             }
         }
 
-        // एक्सेल फ़ाइल डाउनलोड फ़ंक्शनलिटी
         function downloadExcel() {
             const table = reportTableContainer.querySelector('table');
             let html = table.outerHTML;
