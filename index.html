@@ -437,7 +437,7 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (रीडायरेक्ट फिक्स के साथ)
+        // फ़ास्ट लोडिंग कैशे मैकेनिज्म (रीडायरेक्ट और CORS फिक्स के साथ)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -457,16 +457,12 @@
             }
 
             try {
-                // रीडायरेक्ट एरर को रोकने के लिए redirect: "follow" और मोड "cors" होना ज़रूरी है
+                // बिना किसी कस्टम हेडर के साफ़ रिक्वेस्ट भेजें (CORS ब्लॉक से बचने के लिए)
                 const cacheBusterUrl = `${BASE_API_URL}&_cb=${new Date().getTime()}`;
                 
                 const response = await fetch(cacheBusterUrl, {
                     method: "GET",
-                    mode: "cors",
-                    redirect: "follow", 
-                    headers: {
-                        "Content-Type": "text/plain"
-                    }
+                    redirect: "follow"
                 });
                 
                 const json = await response.json();
@@ -475,8 +471,8 @@
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
-                console.error("Fetch major failure: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Connection blocked or timeout.<br><small style='color:#777;'>Please click the 🔄 icon above to force reload.</small></span>";
+                console.error("Fetch failure: ", error);
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Connection blocked or timeout.<br><small style='color:#777;'>Please click the 🔄 icon above to retry.</small></span>";
             }
         }
 
