@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
-    <!-- तेज़ और साफ़ स्क्रीनशॉट कैप्चर करने के लिए लाइब्रेरी -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -361,7 +360,6 @@
             </div>
 
             <div id="resultsSection" style="display: none;">
-                <!-- Copy Screenshot और Download Excel बटन्स का पैनल -->
                 <div class="action-share-panel">
                     <button class="btn-action" id="copyScreenshotBtn">
                         📋 Copy Screenshot
@@ -392,8 +390,8 @@
     </div>
 
     <script>
-        // आपका नया फ्रेश डिप्लॉयड कनवर्टेड यूआरएल
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxIGdL38oD4R4CCSLKZWyME2ay091cVzHR2JEOiOMfoVKvHM_z-99kNcDgaz6kZY9uy/exec?sheet=Sheet3";
+        // आपका नया जेनरेटेड Apps Script URL यहाँ सफलतापूर्वक डाल दिया गया है
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbzVLPQMuBSFwaCCBJSkO1yybRR91hweXly-bkA4gZzs-QzddCeFGhX1M99R4VW6jGgK/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -438,7 +436,25 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // मजबूत XML टनलिंग लोड इंजन जो सुरक्षा नियमों को बाईपास करेगा
+        // सुरक्षा नियमों (CORS) को दरकिनार करने के लिए स्क्रिप्ट इंजेक्शन (JSONP) का उपयोग
+        window.handleAppsScriptResponse = function(json) {
+            try {
+                const oldScript = document.getElementById('jsonp-temp-script');
+                if (oldScript) oldScript.remove();
+
+                rawRows = json.rows || [];
+                if (rawRows && rawRows.length > 0) {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
+                    renderAppContent();
+                } else {
+                    showErrorState();
+                }
+            } catch (e) {
+                console.error(e);
+                showErrorState();
+            }
+        };
+
         function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -459,35 +475,17 @@
                 }
             }
 
-            const xhr = new XMLHttpRequest();
-            const cacheBusterUrl = `${BASE_API_URL}&_ts=${new Date().getTime()}`;
-            
-            xhr.open("GET", cacheBusterUrl, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        try {
-                            const json = JSON.parse(xhr.responseText);
-                            rawRows = json.rows || [];
-                            if (rawRows && rawRows.length > 0) {
-                                localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
-                                renderAppContent();
-                            } else {
-                                throw new Error();
-                            }
-                        } catch (e) {
-                            showErrorState();
-                        }
-                    } else {
-                        showErrorState();
-                    }
-                }
+            const script = document.createElement('script');
+            script.id = 'jsonp-temp-script';
+            script.src = `${BASE_API_URL}&prefix=handleAppsScriptResponse&_ts=${new Date().getTime()}`;
+            script.onerror = function() {
+                showErrorState();
             };
-            xhr.send();
+            document.body.appendChild(script);
         }
 
         function showErrorState() {
-            loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Sync failed or network timeout.<br><small style='color:#777;'>कृपया ऊपर बने 🔄 आइकॉन पर क्लिक करें।</small></span>";
+            loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Sync failed or connection blocked.<br><small style='color:#777;'>कृपया ऊपर बने 🔄 आइकॉन पर क्लिक करें।</small></span>";
         }
 
         function renderAppContent() {
@@ -712,7 +710,6 @@
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // स्क्रीनशॉट कॉपी लॉजिक
         async function copyTableScreenshot() {
             copyScreenshotBtn.innerText = "⏳ Capturing...";
             try {
@@ -744,14 +741,11 @@
             }
         }
 
-        // एक्सेल शीट डाउनलोड लॉजिक
         function downloadExcel() {
             const table = reportTableContainer.querySelector('table');
             let html = table.outerHTML;
-            
             const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement("a");
             link.href = url;
             link.download = `${tableMainHeader.innerText}_Report.xls`;
