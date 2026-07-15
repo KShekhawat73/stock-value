@@ -258,6 +258,7 @@
                 <label class="filter-label" for="storeSelect">Store Name</label>
                 <select id="storeSelect">
                     <option value="">-- SELECT STORE NAME --</option>
+                    <option value="ALL">-- ALL STORES --</option>
                 </select>
             </div>
 
@@ -348,14 +349,14 @@
         }
 
         function initializeStoreDropdown() {
-            storeSelect.innerHTML = '<option value="">-- SELECT STORE NAME --</option>';
+            storeSelect.innerHTML = '<option value="">-- SELECT STORE NAME --</option><option value="ALL">-- ALL STORES --</option>';
             const stores = [...new Set(rawRows.map(r => r["STORE NAME"]))].filter(Boolean).sort();
             stores.forEach(store => {
                 storeSelect.add(new Option(store, store));
             });
         }
 
-        // Populates categories that exist AND have > 0 quantity/value for the chosen store
+        // Populates categories that exist AND have > 0 quantity/value for the chosen store (or all stores)
         function updateCategoryDropdown() {
             const selectedStore = storeSelect.value;
             
@@ -367,7 +368,7 @@
 
             const availableCategories = [...new Set(
                 rawRows.filter(row => {
-                    const matchStore = String(row["STORE NAME"]).trim() === selectedStore.trim();
+                    const matchStore = selectedStore === "ALL" || String(row["STORE NAME"]).trim() === selectedStore.trim();
                     const hasStock = (parseInt(row["VOLUME"]) || 0) > 0 || (parseFloat(row["VALUE"]) || 0) > 0;
                     return matchStore && hasStock;
                 }).map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
@@ -390,14 +391,14 @@
             const selectedCategories = Array.from(categorySelect.selectedOptions).map(opt => opt.value);
             const isAllSelected = selectedCategories.includes("ALL");
 
-            tableMainHeader.innerText = selectedStore;
+            tableMainHeader.innerText = selectedStore === "ALL" ? "ALL STORES DATA" : selectedStore;
 
             let summaryMap = {};
             let grandTotalVolume = 0;
             let grandTotalValue = 0;
 
             rawRows.forEach(row => {
-                if (String(row["STORE NAME"]).trim() !== selectedStore.trim()) return;
+                if (selectedStore !== "ALL" && String(row["STORE NAME"]).trim() !== selectedStore.trim()) return;
 
                 const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
                 
