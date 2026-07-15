@@ -390,8 +390,8 @@
     </div>
 
     <script>
-        // आपका नया जेनरेटेड Apps Script URL यहाँ सफलतापूर्वक डाल दिया गया है
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbzVLPQMuBSFwaCCBJSkO1yybRR91hweXly-bkA4gZzs-QzddCeFGhX1M99R4VW6jGgK/exec?sheet=Sheet3";
+        // आपका नया जेनरेटेड Apps Script URL यहाँ बिल्कुल परफेक्टली सेट है 
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwXM8tKoANHx2nl6xieKqq0XzU5OOYYQa7xwBUtkJuzRq4kurSYe1fMeTbCSBZ5MkcU/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -436,7 +436,7 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // सुरक्षा नियमों (CORS) को दरकिनार करने के लिए स्क्रिप्ट इंजेक्शन (JSONP) का उपयोग
+        // सुरक्षित टनल मैकेनिज्म (JSONP) ग्लोबल सुरक्षा बाईपास हैंडलर
         window.handleAppsScriptResponse = function(json) {
             try {
                 const oldScript = document.getElementById('jsonp-temp-script');
@@ -459,7 +459,7 @@
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
-            loaderTextStatus.innerHTML = "Syncing with Google Database...";
+            loaderTextStatus.innerHTML = "Syncing with Google Database... ";
             
             const cachedData = localStorage.getItem(CACHE_KEY);
 
@@ -475,6 +475,7 @@
                 }
             }
 
+            // ब्राउज़र सुरक्षा नीति (CORS) को पूरी तरह बाईपास करने के लिए स्क्रिप्ट इंजेक्शन टनल
             const script = document.createElement('script');
             script.id = 'jsonp-temp-script';
             script.src = `${BASE_API_URL}&prefix=handleAppsScriptResponse&_ts=${new Date().getTime()}`;
