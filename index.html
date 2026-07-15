@@ -390,8 +390,10 @@
     </div>
 
     <script>
-        // आपका नया Fresh Deployment URL यहाँ सफलतापूर्वक लिंक कर दिया गया है
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbx-vPOZZrTcxKxBM51jHiRoovK7Wnr9Qj8wDnoR__YwjNPwUZVy8WD_8Ro_ErtnFmwd/exec?sheet=Sheet3";
+        // CSV पब्लिशिंग इंजन डायरेक्ट URL (इसे बिना बदले सीधे चलाएं)
+        const SPREADSHEET_ID = "1RPe7exCi5h8lhf92gkaExm9pHTAjy70OgOyyVjt34MA";
+        const SHEET_NAME = "Sheet3";
+        const BASE_API_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -436,11 +438,12 @@
             categoryComboDropdown.classList.remove('show');
         });
 
+        // 100% वर्किंग CSV पार्सर मैकेनिज्म (Google Sheet में बदलाव होते ही ऑटो-कैप्चर)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
             loaderOverlay.style.display = 'flex';
-            loaderTextStatus.innerHTML = "Loading database configuration...";
+            loaderTextStatus.innerHTML = "Syncing with Spreadsheet Data...";
             
             const cachedData = localStorage.getItem(CACHE_KEY);
 
@@ -450,27 +453,72 @@
                     renderAppContent();
                     return;
                 } catch(e) {
-                    console.error("Cache read error", e);
+                    console.error("Cache parsing error", e);
                 }
             }
 
             try {
-                const cacheBusterUrl = `${BASE_API_URL}${BASE_API_URL.includes('?') ? '&' : '?'}_cb=${new Date().getTime()}`;
+                // कैशे बायपास के लिए टाइमस्टैम्प जनरेटर आईडी
+                const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
+                const response = await fetch(cacheBusterUrl);
+                const csvText = await response.text();
                 
-                const response = await fetch(cacheBusterUrl, {
-                    method: "GET",
-                    redirect: "follow"
-                });
-                
-                const json = await response.json();
-                rawRows = json.rows || [];
+                rawRows = parseCSV(csvText);
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
-                console.error("Fetch failure: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Connection blocked or timeout.<br><small style='color:#777;'>Please click the 🔄 icon above to retry.</small></span>";
+                console.error("CSV Engine Connection Error: ", error);
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>Ensure your Google Spreadsheet is set to 'Anyone with link can view'.</small></span>";
             }
+        }
+
+        // CSV डेटा को JSON ऑब्जेक्ट्स में बदलने के लिए फंक्शन
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            if (lines.length === 0) return [];
+            
+            // CSV हेडर्स साफ़ करना
+            const headers = parseCSVLine(lines[0]).map(h => h.trim().toUpperCase());
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const values = parseCSVLine(lines[i]);
+                const obj = {};
+                let hasData = false;
+                
+                headers.forEach((header, index) => {
+                    let val = values[index] !== undefined ? values[index] : "";
+                    // इनवर्टेड कॉमा हटाना
+                    val = val.replace(/^["']|["']$/g, '').trim();
+                    obj[header] = val;
+                    if (val) hasData = true;
+                });
+                
+                if (hasData) result.push(obj);
+            }
+            return result;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
         }
 
         function renderAppContent() {
@@ -537,7 +585,7 @@
             const availableCategories = [...new Set(
                 rawRows.filter(row => {
                     const matchType = selectedType === "ALL" || String(row["STORE CATEGORY"] || '').trim().toUpperCase() === selectedType;
-                    const matchStore = selectedStores.includes("ALL") || selectedStores.includes(String(row["STORE NAME"]).trim());
+                    const matchStore = selectedStores.includes("ALL") || selectedStores.includes(String(row["STORE NAME"] || '').trim());
                     const hasStock = (parseInt(row["VOLUME"]) || 0) > 0 || (parseFloat(row["VALUE"]) || 0) > 0;
                     return matchType && matchStore && hasStock;
                 }).map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
@@ -638,7 +686,7 @@
 
             rawRows.forEach(row => {
                 if (selectedType !== "ALL" && String(row["STORE CATEGORY"] || '').trim().toUpperCase() !== selectedType) return;
-                if (!selectedStores.includes("ALL") && !selectedStores.includes(String(row["STORE NAME"]).trim())) return;
+                if (!selectedStores.includes("ALL") && !selectedStores.includes(String(row["STORE NAME"] || '').trim())) return;
 
                 const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
                 if (!selectedCategories.includes("ALL") && !selectedCategories.includes(category)) return;
@@ -655,11 +703,6 @@
                 }
             });
 
-            Object.values(summaryMap).forEach(c => {
-                grandTotalVolume += c.volume;
-                grandTotalValue += c.value;
-            });
-
             inventoryTableBody.innerHTML = "";
             const sortedCategories = Object.keys(summaryMap).sort();
 
@@ -671,8 +714,10 @@
 
             sortedCategories.forEach(category => {
                 const data = summaryMap[category];
-                const row = document.createElement('tr');
+                grandTotalVolume += data.volume;
+                grandTotalValue += data.value;
                 
+                const row = document.createElement('tr');
                 if (category === "SMART MOBILE" || category === "TABLET") {
                     row.className = "highlight-row";
                 }
