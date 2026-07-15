@@ -328,7 +328,7 @@
 
         <div id="loader-overlay" class="loader-container">
             <div class="spinner-3d"></div>
-            <div class="loader-text" id="loaderTextStatus">Loading database configuration...</div>
+            <div class="loader-text" id="loaderTextStatus">Syncing with Spreadsheet Data...</div>
         </div>
 
         <div id="app-content" style="display: none;">
@@ -390,10 +390,10 @@
     </div>
 
     <script>
-        // CSV पब्लिशिंग इंजन डायरेक्ट URL (इसे बिना बदले सीधे चलाएं)
+        // परमानेंट पब्लिश्ड CSV लिंक मैकेनिज्म
         const SPREADSHEET_ID = "1RPe7exCi5h8lhf92gkaExm9pHTAjy70OgOyyVjt34MA";
         const SHEET_NAME = "Sheet3";
-        const BASE_API_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+        const BASE_API_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/pub?output=csv&gid=1114777977`; 
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -438,7 +438,6 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // 100% वर्किंग CSV पार्सर मैकेनिज्म (Google Sheet में बदलाव होते ही ऑटो-कैप्चर)
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -458,27 +457,27 @@
             }
 
             try {
-                // कैशे बायपास के लिए टाइमस्टैम्प जनरेटर आईडी
+                // कैशे बायपास करने के लिए टाइमस्टैम्प आईडी जोड़ना
                 const cacheBusterUrl = `${BASE_API_URL}&t=${new Date().getTime()}`;
                 const response = await fetch(cacheBusterUrl);
-                const csvText = await response.text();
                 
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const csvText = await response.text();
                 rawRows = parseCSV(csvText);
                 
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
                 console.error("CSV Engine Connection Error: ", error);
-                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>Ensure your Google Spreadsheet is set to 'Anyone with link can view'.</small></span>";
+                loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Data sync failed.<br><small style='color:#777;'>कृपया पक्का करें कि आपने Sheet को 'Publish to the web' कर दिया है।</small></span>";
             }
         }
 
-        // CSV डेटा को JSON ऑब्जेक्ट्स में बदलने के लिए फंक्शन
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
             if (lines.length === 0) return [];
             
-            // CSV हेडर्स साफ़ करना
             const headers = parseCSVLine(lines[0]).map(h => h.trim().toUpperCase());
             const result = [];
             
@@ -490,7 +489,6 @@
                 
                 headers.forEach((header, index) => {
                     let val = values[index] !== undefined ? values[index] : "";
-                    // इनवर्टेड कॉमा हटाना
                     val = val.replace(/^["']|["']$/g, '').trim();
                     obj[header] = val;
                     if (val) hasData = true;
