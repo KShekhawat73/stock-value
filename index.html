@@ -215,7 +215,7 @@
             background-color: #e2e8f0;
         }
 
-        /* Action Panel for Share Tools */
+        /* शेयर टूल्स बटन स्टाइल */
         .action-share-panel {
             display: flex;
             justify-content: flex-end;
@@ -390,7 +390,8 @@
     </div>
 
     <script>
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec?sheet=Sheet3";
+        // आपका नया डिप्लॉयड URL यहाँ सेट कर दिया गया है
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbExUmq8aAZ7G3bxWUG0PM6tRHI1hY_hpSqj_qonGLsHfm7EwUlWtcaUOn4V4DWzp-p/exec?sheet=Sheet3";
         const CACHE_KEY = "SIVMOR_STOCK_CACHE";
 
         let rawRows = [];
@@ -434,7 +435,7 @@
             categoryComboDropdown.classList.remove('show');
         });
 
-        // Fast Load Database logic using localStorage Cache
+        // सुपर-फास्ट लोकलस्टोरेज कैशे लोडिंग
         async function loadData(forceRefresh = false) {
             appContent.style.display = 'none';
             resultsSection.style.display = 'none';
@@ -457,7 +458,6 @@
                 const json = await response.json();
                 rawRows = json.rows || [];
                 
-                // Save to local cache for instant future loads
                 localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
                 renderAppContent();
             } catch (error) {
@@ -692,13 +692,13 @@
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Feature 1: Copy Screenshot Logic
+        // स्क्रीनशॉट इमेज कॉपी फ़ंक्शनलिटी
         async function copyTableScreenshot() {
             copyScreenshotBtn.innerText = "⏳ Capturing...";
             try {
                 const canvas = await html2canvas(reportTableContainer, {
                     backgroundColor: "#ffffff",
-                    scale: 2 // enhances snapshot resolution quality
+                    scale: 2
                 });
                 
                 canvas.toBlob(async (blob) => {
@@ -724,12 +724,11 @@
             }
         }
 
-        // Feature 2: Excel Export Logic
+        // एक्सेल फ़ाइल डाउनलोड फ़ंक्शनलिटी
         function downloadExcel() {
             const table = reportTableContainer.querySelector('table');
             let html = table.outerHTML;
             
-            // Clean encoding issues for Indian rupee symbol
             const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
             const url = URL.createObjectURL(blob);
             
