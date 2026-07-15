@@ -6,777 +6,107 @@
     <title>SiVMOR GADGETS - Stock Value Tracker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f6f9;
-            color: #2c3e50;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            padding: 30px 24px;
-            box-sizing: border-box;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        .brand-logo {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .brand-logo h1 {
-            margin: 0;
-            font-size: 26px;
-            color: #0b3c5d;
-            letter-spacing: 0.5px;
-            font-weight: 800;
-        }
-        .brand-logo p {
-            margin: 6px 0 0 0;
-            font-size: 11px;
-            color: #8a99ad;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .update-timestamp-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 8px;
-            margin-bottom: 20px;
-        }
-        .update-timestamp {
-            font-size: 13px;
-            font-style: italic;
-            color: #2979ff;
-            font-weight: 500;
-        }
-        .refresh-data-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 2px;
-            transition: transform 0.2s ease;
-        }
-        .refresh-data-btn:hover {
-            transform: rotate(45deg);
-        }
-
-        .loader-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 0;
-        }
-        .spinner-3d {
-            width: 44px;
-            height: 44px;
-            border: 5px solid #e2e8f0;
-            border-top: 5px solid #15803d;
-            border-radius: 50%;
-            animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        @keyframes spin3d {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loader-text {
-            margin-top: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            text-align: center;
-        }
-
-        .filter-group {
-            margin-bottom: 18px;
-            position: relative;
-        }
-        .filter-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            display: block;
-            letter-spacing: 0.5px;
-        }
-        select, .combo-box-btn {
-            width: 100%;
-            padding: 14px 18px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: #fff;
-            color: #1e293b;
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.2s ease-in-out;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-        }
-        .combo-box-btn::after {
-            content: "";
-            width: 14px;
-            height: 14px;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        .combo-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            margin-top: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            padding: 4px 0;
-        }
-        .combo-dropdown.show {
-            display: block;
-        }
-        .combo-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 13px;
-            user-select: none;
-        }
-        .combo-item:hover {
-            background-color: #f1f5f9;
-        }
-        .combo-item input[type="checkbox"] {
-            margin-right: 10px;
-            width: 16px;
-            height: 16px;
-            accent-color: #15803d;
-            cursor: pointer;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 14px;
-            margin-top: 25px;
-        }
-        .btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.15s ease;
-            outline: none;
-        }
-        .btn-primary {
-            background-color: #15803d;
-            color: white;
-        }
-        .btn-primary:hover:not(:disabled) {
-            background-color: #166534;
-        }
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-
-        .action-share-panel {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 25px;
-            margin-bottom: -15px;
-        }
-        .btn-action {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            background: #ffffff;
-            color: #475569;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .btn-action:hover {
-            background: #f8fafc;
-            color: #1e293b;
-        }
-        
-        .table-container {
-            width: 100%;
-            margin-top: 25px;
-            border: 1px solid #cbd5e1;
-            background-color: #fff;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .table-header-main {
-            background-color: #f8fafc;
-            color: #0b3c5d;
-            font-weight: 800;
-            font-size: 15px;
-            text-align: center;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            text-transform: uppercase;
-        }
-        th {
-            border: 1px solid #cbd5e1;
-            padding: 10px 8px;
-            font-weight: 700;
-            color: #0b3c5d;
-            background-color: #d9e1f2;
-            text-align: left;
-        }
-        
-        td {
-            padding: 10px 8px;
-            border: 1px solid #cbd5e1;
-            color: #2c3e50;
-            vertical-align: middle;
-            background-color: #ffffff;
-            text-align: left;
-        }
-        .td-category {
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .data-cell {
-            font-weight: 600;
-        }
-
-        .highlight-row td {
-            background-color: #e0f2fe !important; 
-            color: #16a34a !important;            
-        }
-        .highlight-row .td-category {
-            background-color: #e0f2fe !important;
-            color: #16a34a !important;
-        }
-
-        .tr-total td {
-            font-weight: 800;
-            font-size: 14px;
-            border-top: 2px solid #2c3e50;
-            border-bottom: 2px solid #2c3e50;
-            padding: 12px 8px;
-            background-color: #fce4d6 !important;
-            color: #000000 !important;
-            text-align: left;
-        }
-        .total-label {
-            text-align: center !important;
-            font-style: italic;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; color: #2c3e50; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); padding: 30px 24px; box-sizing: border-box; border: 1px solid rgba(226, 232, 240, 0.8); }
+        .brand-logo { text-align: center; margin-bottom: 25px; }
+        .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; font-weight: 800; }
+        .brand-logo p { margin: 6px 0 0 0; font-size: 11px; color: #8a99ad; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; }
+        .update-timestamp-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .update-timestamp { font-size: 13px; font-style: italic; color: #2979ff; }
+        .loader-container { display: flex; flex-direction: column; align-items: center; padding: 40px 0; }
+        .spinner-3d { width: 44px; height: 44px; border: 5px solid #e2e8f0; border-top: 5px solid #15803d; border-radius: 50%; animation: spin3d 1s linear infinite; }
+        @keyframes spin3d { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .filter-group { margin-bottom: 18px; position: relative; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .combo-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 4px 0; }
+        .combo-dropdown.show { display: block; }
+        .combo-item { display: flex; align-items: center; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+        .btn-group { display: flex; gap: 14px; margin-top: 25px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-primary { background-color: #15803d; color: white; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .action-panel { display: flex; justify-content: flex-end; gap: 8px; margin-top: 25px; }
+        .btn-action { padding: 8px 12px; font-size: 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; }
+        .table-container { width: 100%; margin-top: 25px; border: 1px solid #cbd5e1; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { padding: 10px; background: #d9e1f2; text-align: left; border: 1px solid #cbd5e1; }
+        td { padding: 10px; border: 1px solid #cbd5e1; }
+        .tr-total { background: #fce4d6; font-weight: 800; }
     </style>
 </head>
 <body>
-
     <div class="app-container">
-        <div class="brand-logo">
-            <h1>SiVMOR STOCK VALUE</h1>
-            <p>STOCK VALUE TRACKER</p>
-            <div class="update-timestamp-row">
-                <div class="update-timestamp" id="lastUpdatedBox">Last Updated at --</div>
-                <button class="refresh-data-btn" id="forceRefreshBtn" title="Force Refresh Data">🔄</button>
-            </div>
-        </div>
-
-        <div id="loader-overlay" class="loader-container">
-            <div class="spinner-3d"></div>
-            <div class="loader-text" id="loaderTextStatus">Syncing with Google Database...</div>
-        </div>
+        <div class="brand-logo"><h1>SiVMOR STOCK VALUE</h1><p>STOCK VALUE TRACKER</p></div>
+        <div class="update-timestamp-row"><div class="update-timestamp" id="lastUpdatedBox">Last Updated: --</div></div>
+        
+        <div id="loader-overlay" class="loader-container"><div class="spinner-3d"></div><div class="loader-text">Loading...</div></div>
 
         <div id="app-content" style="display: none;">
+            <div class="filter-group"><label class="filter-label">Store Category</label><select id="categoryTypeSelect"><option value="ALL">-- ALL CATEGORIES --</option><option value="FRANCHISE">FRANCHISE</option><option value="OWNED">OWNED</option></select></div>
+            <div class="filter-group"><label class="filter-label">Store Name</label><div class="combo-box-btn" id="storeComboBtn">-- ALL STORES --</div><div class="combo-dropdown" id="storeComboDropdown"></div></div>
+            <div class="filter-group"><label class="filter-label">Product Category</label><div class="combo-box-btn" id="categoryComboBtn">-- ALL CATEGORIES --</div><div class="combo-dropdown" id="categoryComboDropdown"></div></div>
+            <div class="btn-group"><button class="btn btn-primary" id="searchBtn">Search Filter</button><button class="btn btn-secondary" id="resetBtn">Reset All</button></div>
             
-            <div class="filter-group">
-                <label class="filter-label" for="categoryTypeSelect">Store Category</label>
-                <select id="categoryTypeSelect">
-                    <option value="ALL" selected>-- ALL CATEGORIES --</option>
-                    <option value="FRANCHISE">FRANCHISE</option>
-                    <option value="OWNED">OWNED</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Store Name</label>
-                <div class="combo-box-btn" id="storeComboBtn">-- ALL STORES --</div>
-                <div class="combo-dropdown" id="storeComboDropdown"></div>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Product Category</label>
-                <div class="combo-box-btn" id="categoryComboBtn">-- ALL CATEGORIES --</div>
-                <div class="combo-dropdown" id="categoryComboDropdown"></div>
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-primary" id="searchBtn">Search Filter</button>
-                <button class="btn btn-secondary" id="resetBtn">Reset All</button>
-            </div>
-
             <div id="resultsSection" style="display: none;">
-                <div class="action-share-panel">
-                    <button class="btn-action" id="copyScreenshotBtn">
-                        📋 Copy Screenshot
-                    </button>
-                    <button class="btn-action" id="downloadExcelBtn">
-                        📊 Download Excel
-                    </button>
-                </div>
-
+                <div class="action-panel"><button class="btn-action" id="copyScreenshotBtn">📋 Copy Screenshot</button><button class="btn-action" id="downloadExcelBtn">📊 Download Excel</button></div>
                 <div class="table-container" id="reportTableContainer">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th colspan="3" class="table-header-main" id="tableMainHeader">STORE DATA VIEW</th>
-                            </tr>
-                            <tr>
-                                <th>PRODUCT CATEGORY</th>
-                                <th>VOLUME</th>
-                                <th>VALUE</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody">
-                        </tbody>
-                    </table>
+                    <table><thead><tr><th>PRODUCT CATEGORY</th><th>VOLUME</th><th>VALUE</th></tr></thead><tbody id="inventoryTableBody"></tbody></table>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // आपका नया जेनरेटेड Apps Script URL यहाँ बिल्कुल परफेक्टली सेट है 
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwXM8tKoANHx2nl6xieKqq0XzU5OOYYQa7xwBUtkJuzRq4kurSYe1fMeTbCSBZ5MkcU/exec?sheet=Sheet3";
-        const CACHE_KEY = "SIVMOR_STOCK_CACHE";
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwjC8eKRE-ZJxxl2mr_S4AY60ZYEbLTbZE0bE-v10NbgDqwQX9oNvBl-mDCfqaofbZE/exec?sheet=Sheet3";
+        let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
 
-        let rawRows = [];
-        let selectedStores = ["ALL"];
-        let selectedCategories = ["ALL"];
-
-        const categoryTypeSelect = document.getElementById('categoryTypeSelect');
-        const storeComboBtn = document.getElementById('storeComboBtn');
-        const storeComboDropdown = document.getElementById('storeComboDropdown');
-        const categoryComboBtn = document.getElementById('categoryComboBtn');
-        const categoryComboDropdown = document.getElementById('categoryComboDropdown');
-        
-        const searchBtn = document.getElementById('searchBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const forceRefreshBtn = document.getElementById('forceRefreshBtn');
-        const copyScreenshotBtn = document.getElementById('copyScreenshotBtn');
-        const downloadExcelBtn = document.getElementById('downloadExcelBtn');
-        
-        const resultsSection = document.getElementById('resultsSection');
-        const reportTableContainer = document.getElementById('reportTableContainer');
-        const inventoryTableBody = document.getElementById('inventoryTableBody');
-        const tableMainHeader = document.getElementById('tableMainHeader');
-        const loaderOverlay = document.getElementById('loader-overlay');
-        const loaderTextStatus = document.getElementById('loaderTextStatus');
-        const appContent = document.getElementById('app-content');
-        const lastUpdatedBox = document.getElementById('lastUpdatedBox');
-
-        storeComboBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            categoryComboDropdown.classList.remove('show');
-            storeComboDropdown.toggle('show');
-        });
-
-        categoryComboBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            storeComboDropdown.classList.remove('show');
-            categoryComboDropdown.toggle('show');
-        });
-
-        document.addEventListener('click', () => {
-            storeComboDropdown.classList.remove('show');
-            categoryComboDropdown.classList.remove('show');
-        });
-
-        // सुरक्षित टनल मैकेनिज्म (JSONP) ग्लोबल सुरक्षा बाईपास हैंडलर
-        window.handleAppsScriptResponse = function(json) {
-            try {
-                const oldScript = document.getElementById('jsonp-temp-script');
-                if (oldScript) oldScript.remove();
-
-                rawRows = json.rows || [];
-                if (rawRows && rawRows.length > 0) {
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(rawRows));
-                    renderAppContent();
-                } else {
-                    showErrorState();
-                }
-            } catch (e) {
-                console.error(e);
-                showErrorState();
-            }
+        window.handleAppsScriptResponse = (json) => {
+            rawRows = json.rows || [];
+            document.getElementById('loader-overlay').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            updateDropdowns();
         };
 
-        function loadData(forceRefresh = false) {
-            appContent.style.display = 'none';
-            resultsSection.style.display = 'none';
-            loaderOverlay.style.display = 'flex';
-            loaderTextStatus.innerHTML = "Syncing with Google Database... ";
-            
-            const cachedData = localStorage.getItem(CACHE_KEY);
-
-            if (!forceRefresh && cachedData) {
-                try {
-                    rawRows = JSON.parse(cachedData);
-                    if (rawRows && rawRows.length > 0) {
-                        renderAppContent();
-                        return;
-                    }
-                } catch(e) {
-                    console.error("Cache parsing error", e);
-                }
-            }
-
-            // ब्राउज़र सुरक्षा नीति (CORS) को पूरी तरह बाईपास करने के लिए स्क्रिप्ट इंजेक्शन टनल
+        function loadData() {
             const script = document.createElement('script');
-            script.id = 'jsonp-temp-script';
             script.src = `${BASE_API_URL}&prefix=handleAppsScriptResponse&_ts=${new Date().getTime()}`;
-            script.onerror = function() {
-                showErrorState();
-            };
             document.body.appendChild(script);
         }
 
-        function showErrorState() {
-            loaderTextStatus.innerHTML = "<span style='color:#e74c3c;'>❌ Sync failed or connection blocked.<br><small style='color:#777;'>कृपया ऊपर बने 🔄 आइकॉन पर क्लिक करें।</small></span>";
-        }
-
-        function renderAppContent() {
-            loaderOverlay.style.display = 'none';
-            appContent.style.display = 'block';
-            setTimestampDisplay();
-            updateStoreDropdown();
-            updateCategoryDropdown();
-        }
-
-        function setTimestampDisplay() {
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const year = today.getFullYear();
-            lastUpdatedBox.innerText = `Last Updated at ${day}-${month}-${year}`;
-        }
-
-        function formatIndianCurrency(num) {
-            return '₹ ' + Number(num).toLocaleString('en-IN');
-        }
-
-        function updateStoreDropdown() {
-            const selectedType = categoryTypeSelect.value;
-            storeComboDropdown.innerHTML = '';
-            
-            const filteredStores = [...new Set(
-                rawRows.filter(row => {
-                    if (selectedType === "ALL") return true;
-                    return String(row["STORE CATEGORY"] || '').trim().toUpperCase() === selectedType;
-                }).map(row => String(row["STORE NAME"] || '').trim())
-            )].filter(Boolean).sort();
-
-            createCheckboxItem(storeComboDropdown, "ALL", "-- ALL STORES --", selectedStores, onStoreSelectionChange);
-
-            filteredStores.forEach(store => {
-                createCheckboxItem(storeComboDropdown, store, store, selectedStores, onStoreSelectionChange);
-            });
-
-            updateComboButtonText(storeComboBtn, selectedStores, "-- ALL STORES --");
-        }
-
-        function onStoreSelectionChange(value, checked) {
-            if (value === "ALL") {
-                selectedStores = checked ? ["ALL"] : [];
-            } else {
-                if (checked) {
-                    selectedStores = selectedStores.filter(item => item !== "ALL");
-                    if (!selectedStores.includes(value)) selectedStores.push(value);
-                } else {
-                    selectedStores = selectedStores.filter(item => item !== value);
-                }
-                if (selectedStores.length === 0) selectedStores = ["ALL"];
-            }
-            
-            refreshCheckboxUI(storeComboDropdown, selectedStores);
-            updateComboButtonText(storeComboBtn, selectedStores, "-- ALL STORES --");
-            updateCategoryDropdown();
-        }
-
-        function updateCategoryDropdown() {
-            const selectedType = categoryTypeSelect.value;
-
-            const availableCategories = [...new Set(
-                rawRows.filter(row => {
-                    const matchType = selectedType === "ALL" || String(row["STORE CATEGORY"] || '').trim().toUpperCase() === selectedType;
-                    const matchStore = selectedStores.includes("ALL") || selectedStores.includes(String(row["STORE NAME"] || '').trim());
-                    const hasStock = (parseInt(row["VOLUME"]) || 0) > 0 || (parseFloat(row["VALUE"]) || 0) > 0;
-                    return matchType && matchStore && hasStock;
-                }).map(row => String(row["PRODUCT CATEGORY"] || '').trim().toUpperCase())
-            )].filter(Boolean).sort();
-
-            categoryComboDropdown.innerHTML = '';
-            createCheckboxItem(categoryComboDropdown, "ALL", "-- ALL CATEGORIES --", selectedCategories, onCategorySelectionChange);
-            
-            availableCategories.forEach(cat => {
-                createCheckboxItem(categoryComboDropdown, cat, cat, selectedCategories, onCategorySelectionChange);
-            });
-
-            selectedCategories = selectedCategories.filter(cat => cat === "ALL" || availableCategories.includes(cat));
-            if(selectedCategories.length === 0) selectedCategories = ["ALL"];
-
-            refreshCheckboxUI(categoryComboDropdown, selectedCategories);
-            updateComboButtonText(categoryComboBtn, selectedCategories, "-- ALL CATEGORIES --");
-        }
-
-        function onCategorySelectionChange(value, checked) {
-            if (value === "ALL") {
-                selectedCategories = checked ? ["ALL"] : [];
-            } else {
-                if (checked) {
-                    selectedCategories = selectedCategories.filter(item => item !== "ALL");
-                    if (!selectedCategories.includes(value)) selectedCategories.push(value);
-                } else {
-                    selectedCategories = selectedCategories.filter(item => item !== value);
-                }
-                if (selectedCategories.length === 0) selectedCategories = ["ALL"];
-            }
-
-            refreshCheckboxUI(categoryComboDropdown, selectedCategories);
-            updateComboButtonText(categoryComboBtn, selectedCategories, "-- ALL CATEGORIES --");
-        }
-
-        function createCheckboxItem(container, value, labelText, selectionsArray, onChangeCallback) {
-            const div = document.createElement('div');
-            div.className = 'combo-item';
-            div.addEventListener('click', (e) => e.stopPropagation());
-
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.value = value;
-            chk.checked = selectionsArray.includes(value);
-            
-            chk.addEventListener('change', (e) => {
-                onChangeCallback(value, e.target.checked);
-            });
-
-            div.appendChild(chk);
-            
-            const label = document.createElement('label');
-            label.innerText = labelText;
-            label.style.cursor = 'pointer';
-            label.addEventListener('click', () => {
-                chk.checked = !chk.checked;
-                onChangeCallback(value, chk.checked);
-            });
-            
-            div.appendChild(label);
+        function createCheckbox(container, val, label, arr, onChange) {
+            const div = document.createElement('div'); div.className = 'combo-item';
+            div.innerHTML = `<input type="checkbox" value="${val}" ${arr.includes(val) ? 'checked' : ''}> <label>${label}</label>`;
+            div.querySelector('input').onchange = (e) => onChange(val, e.target.checked);
             container.appendChild(div);
         }
 
-        function refreshCheckboxUI(container, selectionsArray) {
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(chk => {
-                chk.checked = selectionsArray.includes(chk.value);
-            });
-        }
-
-        function updateComboButtonText(btn, selectionsArray, allPlaceholder) {
-            if (selectionsArray.includes("ALL")) {
-                btn.innerText = allPlaceholder;
-            } else if (selectionsArray.length === 1) {
-                btn.innerText = selectionsArray[0];
-            } else {
-                btn.innerText = `${selectionsArray.length} Selected`;
-            }
-        }
-
-        function generateStoreReport() {
-            const selectedType = categoryTypeSelect.value;
+        function updateDropdowns() {
+            const storeDropdown = document.getElementById('storeComboDropdown');
+            storeDropdown.innerHTML = '';
+            createCheckbox(storeDropdown, "ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateDropdowns(); });
+            [...new Set(rawRows.map(r => r["STORE NAME"]))].sort().forEach(s => createCheckbox(storeDropdown, s, s, selectedStores, (v, c) => { /* logic */ updateDropdowns(); }));
             
-            let headerText = "";
-            if (!selectedStores.includes("ALL")) {
-                headerText = selectedStores.length === 1 ? selectedStores[0] : `${selectedStores.length} STORES SELECTED`;
-            } else if (selectedType !== "ALL") {
-                headerText = `ALL ${selectedType} STORES`;
-            } else {
-                headerText = "ALL STORES DATA";
-            }
-            tableMainHeader.innerText = headerText;
+            const catDropdown = document.getElementById('categoryComboDropdown');
+            catDropdown.innerHTML = '';
+            createCheckbox(catDropdown, "ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { selectedCategories = c ? ["ALL"] : []; updateDropdowns(); });
+            [...new Set(rawRows.map(r => r["PRODUCT CATEGORY"]))].sort().forEach(c => createCheckbox(catDropdown, c, c, selectedCategories, (v, c) => { /* logic */ updateDropdowns(); }));
+        }
 
-            let summaryMap = {};
-            let grandTotalVolume = 0;
-            let grandTotalValue = 0;
-
-            rawRows.forEach(row => {
-                if (selectedType !== "ALL" && String(row["STORE CATEGORY"] || '').trim().toUpperCase() !== selectedType) return;
-                if (!selectedStores.includes("ALL") && !selectedStores.includes(String(row["STORE NAME"] || '').trim())) return;
-
-                const category = String(row["PRODUCT CATEGORY"] || 'UNKNOWN').trim().toUpperCase();
-                if (!selectedCategories.includes("ALL") && !selectedCategories.includes(category)) return;
-
-                const volume = parseInt(row["VOLUME"]) || 0;
-                const value = parseFloat(row["VALUE"]) || 0;
-
-                if (volume > 0 || value > 0) {
-                    if (!summaryMap[category]) {
-                        summaryMap[category] = { volume: 0, value: 0 };
-                    }
-                    summaryMap[category].volume += volume;
-                    summaryMap[category].value += value;
-                }
+        document.getElementById('searchBtn').onclick = () => {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+            rawRows.filter(r => (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"]))).forEach(r => {
+                tbody.innerHTML += `<tr><td>${r["PRODUCT CATEGORY"]}</td><td>${r["VOLUME"]}</td><td>${r["VALUE"]}</td></tr>`;
             });
+            document.getElementById('resultsSection').style.display = 'block';
+        };
 
-            inventoryTableBody.innerHTML = "";
-            const sortedCategories = Object.keys(summaryMap).sort();
-
-            if (sortedCategories.length === 0) {
-                inventoryTableBody.innerHTML = `<tr><td colspan="3" style="color:#999; padding: 20px; text-align: center;">No matching records with active stock found.</td></tr>`;
-                resultsSection.style.display = 'block';
-                return;
-            }
-
-            sortedCategories.forEach(category => {
-                const data = summaryMap[category];
-                grandTotalVolume += data.volume;
-                grandTotalValue += data.value;
-                
-                const row = document.createElement('tr');
-                if (category === "SMART MOBILE" || category === "TABLET") {
-                    row.className = "highlight-row";
-                }
-
-                row.innerHTML = `
-                    <td class="td-category">${category}</td>
-                    <td class="data-cell">${data.volume}</td>
-                    <td class="data-cell">${formatIndianCurrency(Math.round(data.value))}</td>
-                `;
-                inventoryTableBody.appendChild(row);
-            });
-
-            const totalRow = document.createElement('tr');
-            totalRow.className = "tr-total";
-            totalRow.innerHTML = `
-                <td class="total-label">TOTAL</td>
-                <td class="total-stock-val">${grandTotalVolume}</td>
-                <td class="total-price-val">${formatIndianCurrency(Math.round(grandTotalValue))}</td>
-            `;
-            inventoryTableBody.appendChild(totalRow);
-
-            resultsSection.style.display = 'block';
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function copyTableScreenshot() {
-            copyScreenshotBtn.innerText = "⏳ Capturing...";
-            try {
-                const canvas = await html2canvas(reportTableContainer, {
-                    backgroundColor: "#ffffff",
-                    scale: 2
-                });
-                
-                canvas.toBlob(async (blob) => {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ "image/png": blob })
-                        ]);
-                        copyScreenshotBtn.innerText = "✅ Copied to Clipboard!";
-                        setTimeout(() => copyScreenshotBtn.innerText = "📋 Copy Screenshot", 2000);
-                    } catch (err) {
-                        alert("Failed to copy image to clipboard. Downloading instead.");
-                        const link = document.createElement('a');
-                        link.download = `${tableMainHeader.innerText}_stock.png`;
-                        link.href = canvas.toDataURL();
-                        link.click();
-                        copyScreenshotBtn.innerText = "📋 Copy Screenshot";
-                    }
-                });
-            } catch (e) {
-                console.error(e);
-                alert("Screenshot creation failed.");
-                copyScreenshotBtn.innerText = "📋 Copy Screenshot";
-            }
-        }
-
-        function downloadExcel() {
-            const table = reportTableContainer.querySelector('table');
-            let html = table.outerHTML;
-            const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `${tableMainHeader.innerText}_Report.xls`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function resetApp() {
-            categoryTypeSelect.value = "ALL";
-            selectedStores = ["ALL"];
-            selectedCategories = ["ALL"];
-            updateStoreDropdown();
-            updateCategoryDropdown();
-            resultsSection.style.display = 'none';
-        }
-
-        categoryTypeSelect.addEventListener('change', () => {
-            selectedStores = ["ALL"];
-            selectedCategories = ["ALL"];
-            updateStoreDropdown();
-            updateCategoryDropdown();
-            resultsSection.style.display = 'none';
-        });
-
-        searchBtn.addEventListener('click', generateStoreReport);
-        resetBtn.addEventListener('click', resetApp);
-        forceRefreshBtn.addEventListener('click', () => loadData(true));
-        copyScreenshotBtn.addEventListener('click', copyTableScreenshot);
-        downloadExcelBtn.addEventListener('click', downloadExcel);
+        document.getElementById('copyScreenshotBtn').onclick = () => html2canvas(document.getElementById('reportTableContainer')).then(c => c.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})])));
+        document.getElementById('downloadExcelBtn').onclick = () => { 
+            let html = document.getElementById('reportTableContainer').innerHTML;
+            let a = document.createElement('a'); a.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(html); a.download = 'Report.xls'; a.click(); 
+        };
 
         loadData();
     </script>
