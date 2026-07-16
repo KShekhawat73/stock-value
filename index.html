@@ -121,8 +121,8 @@
     </div>
 
     <script>
-        // आपका नया API URL
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
+        // आपका बिल्कुल नया API URL
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbzf3ZHk1IY8alNWkeRLLDuknuBrt19vpfsMz4DlOnXeZrvjHnxyeQQi5Fdz-eNErf0B/exec";
         let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
 
         const categoryTypeSelect = document.getElementById('categoryTypeSelect');
@@ -131,7 +131,7 @@
         const categoryComboBtn = document.getElementById('categoryComboBtn');
         const categoryComboDropdown = document.getElementById('categoryComboDropdown');
 
-        // Toggle dropdowns
+        // Dropdowns को Toggle करने के लिए
         storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
         categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
         document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
@@ -157,8 +157,8 @@
                 updateStoreDropdown();
                 updateCategoryDropdown();
             } catch (error) { 
-                console.error(error); 
-                document.getElementById('loader-overlay').innerHTML = "<p style='color:red;'>Failed to load data. Please refresh.</p>";
+                console.error("Fetch Error:", error); 
+                document.getElementById('loader-overlay').innerHTML = "<p style='color:red; text-align:center; padding:20px;'>Failed to load data.<br>Please try again.</p>";
             }
         }
 
@@ -169,7 +169,7 @@
             // Store Category के आधार पर स्टोर फिल्टर करें
             const stores = [...new Set(rawRows.filter(r => type === "ALL" || r["STORE CATEGORY"] === type).map(r => r["STORE NAME"]))].filter(Boolean).sort();
             storeComboDropdown.innerHTML = '';
-            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); }, storeComboDropdown);
+            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); updateCategoryDropdown(); }, storeComboDropdown);
             stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
                 if(c) { selectedStores = selectedStores.filter(i=>i!=="ALL"); selectedStores.push(v); }
                 else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
@@ -226,7 +226,7 @@
 
             const keys = Object.keys(summary);
             if(keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">No Stock Available</td></tr>`;
+                body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#64748b; padding:20px;">No Stock Available</td></tr>`;
             } else {
                 keys.forEach(k => {
                     gVol += summary[k].v; gVal += summary[k].p;
