@@ -1,121 +1,88 @@
-<script>
-    const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxu8fk3RE7uEDawYBdYWyKOVK9sr1ku2L3kilyF6Uq4cpM4T4bS9lwMJRZWS7ixVpO-/exec?sheet=Sheet3";
-    let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
-    let lastUpdated = ""; // Variable to store timestamp
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiVMOR GADGETS - Stock Value Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f4f6f9; color: #2c3e50; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 480px; background: #ffffff; border-radius: 20px; padding: 30px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .brand-logo { text-align: center; margin-bottom: 25px; }
+        .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; }
+        .update-timestamp { font-size: 13px; color: #2979ff; text-align: center; margin-top: 8px; font-weight: 500; }
+        .filter-group { margin-bottom: 18px; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; cursor: pointer; background: #fff; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-primary { background-color: #15803d; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 13px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; }
+        th { background-color: #d9e1f2; color: #0b3c5d; }
+    </style>
+</head>
+<body>
 
-    const categoryTypeSelect = document.getElementById('categoryTypeSelect');
-    const storeComboBtn = document.getElementById('storeComboBtn');
-    const storeComboDropdown = document.getElementById('storeComboDropdown');
-    const categoryComboBtn = document.getElementById('categoryComboBtn');
-    const categoryComboDropdown = document.getElementById('categoryComboDropdown');
+    <div class="app-container">
+        <div class="brand-logo">
+            <h1>SiVMOR STOCK VALUE</h1>
+            <div class="update-timestamp" id="lastUpdatedBox">Loading...</div>
+        </div>
 
-    // Toggle dropdowns
-    storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
-    categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
-    document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
+        <div class="filter-group">
+            <label class="filter-label">Store Category</label>
+            <select id="categoryTypeSelect">
+                <option value="ALL">-- ALL CATEGORIES --</option>
+                <option value="FRANCHISE">FRANCHISE</option>
+                <option value="OWNED">OWNED</option>
+            </select>
+        </div>
 
-    // Update Store dropdown when Category Type changes
-    categoryTypeSelect.addEventListener('change', () => {
-        selectedStores = ["ALL"]; // Reset store selection
-        updateStoreDropdown();
-        updateCategoryDropdown();
-    });
+        <button class="btn btn-primary" id="searchBtn">Search Filter</button>
 
-    async function loadData() {
-        try {
-            const response = await fetch(BASE_API_URL);
-            const json = await response.json();
-            rawRows = json.rows || [];
-            lastUpdated = json.updatedAt || "--"; // Assuming your API returns an 'updatedAt' field
-            document.getElementById('lastUpdatedBox').innerText = `Last Updated at ${lastUpdated}`;
-            
-            document.getElementById('loader-overlay').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            updateStoreDropdown();
-            updateCategoryDropdown();
-        } catch (error) { console.error(error); }
-    }
+        <div id="resultsSection" style="display: none;">
+            <table>
+                <thead>
+                    <tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
+    </div>
 
-    function formatIndianCurrency(num) { return '₹ ' + Number(num).toLocaleString('en-IN'); }
+    <script>
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
+        let rawRows = [];
 
-    function updateStoreDropdown() {
-        const type = categoryTypeSelect.value;
-        const stores = [...new Set(rawRows.filter(r => type === "ALL" || r["STORE CATEGORY"] === type).map(r => r["STORE NAME"]))].filter(Boolean).sort();
-        storeComboDropdown.innerHTML = '';
-        createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); updateCategoryDropdown(); }, storeComboDropdown);
-        stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
-            if(c) { selectedStores = selectedStores.filter(i=>i!=="ALL"); selectedStores.push(v); }
-            else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
-            updateStoreDropdown(); updateCategoryDropdown();
-        }, storeComboDropdown));
-        storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
-    }
-
-    function updateCategoryDropdown() {
-        const type = categoryTypeSelect.value;
-        // Filter categories based on currently selected stores AND category type
-        const cats = [...new Set(rawRows.filter(r => 
-            (type === "ALL" || r["STORE CATEGORY"] === type) &&
-            (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"]))
-        ).map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
-        
-        categoryComboDropdown.innerHTML = '';
-        createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { selectedCategories = c ? ["ALL"] : []; updateCategoryDropdown(); }, categoryComboDropdown);
-        cats.forEach(c => createCheckbox(c, c, selectedCategories, (v, checked) => {
-            if(checked) { selectedCategories = selectedCategories.filter(i=>i!=="ALL"); selectedCategories.push(v); }
-            else { selectedCategories = selectedCategories.filter(i=>i!==v); if(selectedCategories.length===0) selectedCategories=["ALL"]; }
-            updateCategoryDropdown();
-        }, categoryComboDropdown));
-        categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
-    }
-
-    function createCheckbox(val, label, arr, callback, container) {
-        const div = document.createElement('div'); div.className = 'combo-item';
-        div.innerHTML = `<input type="checkbox" ${arr.includes(val) ? 'checked' : ''}> ${label}`;
-        div.addEventListener('click', (e) => { callback(val, div.querySelector('input').checked); });
-        container.appendChild(div);
-    }
-
-    function generateStoreReport() {
-        const body = document.getElementById('inventoryTableBody');
-        body.innerHTML = "";
-        let summary = {}, gVol = 0, gVal = 0;
-        
-        rawRows.forEach(r => {
-            const vol = parseInt(r["VOLUME"] || 0);
-            if ((categoryTypeSelect.value === "ALL" || r["STORE CATEGORY"] === categoryTypeSelect.value) &&
-                (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) && 
-                (selectedCategories.includes("ALL") || selectedCategories.includes(r["PRODUCT CATEGORY"]))) {
-                
-                // Only include if Volume > 0
-                if (vol > 0) {
-                    let cat = r["PRODUCT CATEGORY"];
-                    if(!summary[cat]) summary[cat] = {v:0, p:0};
-                    summary[cat].v += vol;
-                    summary[cat].p += parseFloat(r["VALUE"] || 0);
-                }
+        async function loadData() {
+            try {
+                const response = await fetch(BASE_API_URL);
+                const json = await response.json();
+                rawRows = json.rows || [];
+                document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
+            } catch (error) {
+                console.error("Error loading data:", error);
             }
-        });
-
-        Object.keys(summary).forEach(k => {
-            gVol += summary[k].v; gVal += summary[k].p;
-            body.innerHTML += `<tr><td class="td-category">${k}</td><td>${summary[k].v}</td><td>${formatIndianCurrency(Math.round(summary[k].p))}</td></tr>`;
-        });
-        
-        if (Object.keys(summary).length > 0) {
-            body.innerHTML += `<tr class="tr-total"><td class="total-label">TOTAL</td><td>${gVol}</td><td>${formatIndianCurrency(Math.round(gVal))}</td></tr>`;
         }
-        document.getElementById('resultsSection').style.display = 'block';
-        document.getElementById('actionButtons').style.display = 'flex';
-    }
 
-    function downloadExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx"); }
-    async function copyScreenshot() {
-        const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
-        canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
-    }
+        function generateStoreReport() {
+            const body = document.getElementById('inventoryTableBody');
+            body.innerHTML = "";
+            const catType = document.getElementById('categoryTypeSelect').value;
+            
+            rawRows.forEach(r => {
+                const vol = parseInt(r["VOLUME"] || 0);
+                // Filter by Category Type and hide items with 0 stock
+                if ((catType === "ALL" || r["STORE CATEGORY"] === catType) && vol > 0) {
+                    body.innerHTML += `<tr><td>${r["PRODUCT CATEGORY"]}</td><td>${vol}</td><td>${r["VALUE"]}</td></tr>`;
+                }
+            });
+            document.getElementById('resultsSection').style.display = 'block';
+        }
 
-    document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
-    document.getElementById('resetBtn').addEventListener('click', () => location.reload());
-    loadData();
-</script>
+        document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
+        loadData();
+    </script>
+</body>
+</html>
