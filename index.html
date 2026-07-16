@@ -29,7 +29,7 @@
         
         .button-group { display: flex; gap: 14px; margin-top: 25px; }
         .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s ease; }
-        .btn-primary { background-color: #15803d; color: white; }
+        .btn-reset { background-color: #ef4444; color: white; width: 100%; } /* नया रिसेट बटन डिज़ाइन */
         .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
         .table-container { width: 100%; margin-top: 25px; border: 1px solid #cbd5e1; background-color: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -79,8 +79,7 @@
             </div>
 
             <div class="button-group">
-                <button class="btn btn-primary" id="searchBtn">Search Filter</button>
-                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                <button class="btn btn-reset" id="resetBtn">Reset All Filters</button>
             </div>
 
             <div class="button-group" id="actionButtons" style="display: none;">
@@ -120,10 +119,13 @@
         storeComboDropdown.addEventListener('click', (e) => e.stopPropagation());
         categoryComboDropdown.addEventListener('click', (e) => e.stopPropagation());
 
+        // ऑटो-सर्च: Category Type बदलने पर
         categoryTypeSelect.addEventListener('change', () => {
             selectedStores = ["ALL"]; 
+            selectedCategories = ["ALL"];
             updateStoreDropdown();
             updateCategoryDropdown();
+            generateStoreReport(); // <--- तुरंत डेटा अपडेट
         });
 
         async function loadData() {
@@ -136,6 +138,7 @@
                 document.getElementById('app-content').style.display = 'block';
                 updateStoreDropdown();
                 updateCategoryDropdown();
+                generateStoreReport(); // <--- पेज लोड होते ही डिफ़ॉल्ट डेटा दिखाएं
             } catch (error) { 
                 console.error("Fetch Error:", error); 
                 document.getElementById('loader-overlay').innerHTML = "<p style='color:red;'>Failed to load data. Please refresh.</p>";
@@ -158,11 +161,19 @@
             ).map(r => r["STORE NAME"]))].filter(Boolean).sort();
             
             storeComboDropdown.innerHTML = '';
-            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); updateCategoryDropdown(); }, storeComboDropdown);
+            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { 
+                selectedStores = c ? ["ALL"] : []; 
+                updateStoreDropdown(); 
+                updateCategoryDropdown(); 
+                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+            }, storeComboDropdown);
+
             stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
                 if(c) { selectedStores = selectedStores.filter(i=>i!=="ALL"); selectedStores.push(v); }
                 else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
-                updateStoreDropdown(); updateCategoryDropdown();
+                updateStoreDropdown(); 
+                updateCategoryDropdown();
+                generateStoreReport(); // <--- तुरंत डेटा अपडेट
             }, storeComboDropdown));
             storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
         }
@@ -176,11 +187,17 @@
             ).map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
             
             categoryComboDropdown.innerHTML = '';
-            createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { selectedCategories = c ? ["ALL"] : []; updateCategoryDropdown(); }, categoryComboDropdown);
+            createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { 
+                selectedCategories = c ? ["ALL"] : []; 
+                updateCategoryDropdown(); 
+                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+            }, categoryComboDropdown);
+
             cats.forEach(c => createCheckbox(c, c, selectedCategories, (v, checked) => {
                 if(checked) { selectedCategories = selectedCategories.filter(i=>i!=="ALL"); selectedCategories.push(v); }
                 else { selectedCategories = selectedCategories.filter(i=>i!==v); if(selectedCategories.length===0) selectedCategories=["ALL"]; }
                 updateCategoryDropdown();
+                generateStoreReport(); // <--- तुरंत डेटा अपडेट
             }, categoryComboDropdown));
             categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
         }
@@ -236,14 +253,24 @@
             document.getElementById('actionButtons').style.display = 'flex';
         }
 
+        // नया रिसेट फंक्शन जो बिना पेज रीलोड किए सब कुछ क्लियर कर देगा
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            categoryTypeSelect.value = "ALL";
+            selectedStores = ["ALL"];
+            selectedCategories = ["ALL"];
+            storeComboDropdown.classList.remove('show');
+            categoryComboDropdown.classList.remove('show');
+            
+            updateStoreDropdown();
+            updateCategoryDropdown();
+            generateStoreReport();
+        });
+
         function downloadExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx"); }
         async function copyScreenshot() {
             const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
             canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
         }
-
-        document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
-        document.getElementById('resetBtn').addEventListener('click', () => location.reload());
         
         loadData();
     </script>
