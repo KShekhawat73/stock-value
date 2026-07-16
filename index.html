@@ -7,27 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f6f9;
-            color: #2c3e50;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            padding: 30px 24px;
-            box-sizing: border-box;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; color: #2c3e50; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); padding: 30px 24px; box-sizing: border-box; border: 1px solid rgba(226, 232, 240, 0.8); }
         .brand-logo { text-align: center; margin-bottom: 25px; }
         .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; letter-spacing: 0.5px; font-weight: 800; }
         .brand-logo p { margin: 6px 0 0 0; font-size: 11px; color: #8a99ad; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; }
@@ -55,7 +36,6 @@
         td { padding: 10px 8px; border: 1px solid #cbd5e1; color: #2c3e50; background-color: #ffffff; text-align: left; }
         .td-category { font-weight: 700; text-transform: uppercase; }
         .data-cell { font-weight: 600; }
-        .highlight-row td { background-color: #e0f2fe !important; color: #16a34a !important; }
         .tr-total td { font-weight: 800; border-top: 2px solid #2c3e50; padding: 12px 8px; background-color: #fce4d6 !important; color: #000000 !important; }
         .total-label { text-align: center !important; font-style: italic; }
     </style>
@@ -121,7 +101,6 @@
     </div>
 
     <script>
-        // आपका बिल्कुल नया API URL
         const BASE_API_URL = "https://script.google.com/macros/s/AKfycbzf3ZHk1IY8alNWkeRLLDuknuBrt19vpfsMz4DlOnXeZrvjHnxyeQQi5Fdz-eNErf0B/exec";
         let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
 
@@ -131,12 +110,10 @@
         const categoryComboBtn = document.getElementById('categoryComboBtn');
         const categoryComboDropdown = document.getElementById('categoryComboDropdown');
 
-        // Dropdowns को Toggle करने के लिए
         storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
         categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
         document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
 
-        // जब Store Category (OWNED/FRANCHISE) बदले, तो Store Name लिस्ट अपडेट करें
         categoryTypeSelect.addEventListener('change', () => {
             selectedStores = ["ALL"]; 
             updateStoreDropdown();
@@ -148,26 +125,33 @@
                 const response = await fetch(BASE_API_URL);
                 const json = await response.json();
                 rawRows = json.rows || [];
-                
-                // Last Updated टाइम दिखाएं
                 document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
-                
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
                 updateStoreDropdown();
                 updateCategoryDropdown();
             } catch (error) { 
                 console.error("Fetch Error:", error); 
-                document.getElementById('loader-overlay').innerHTML = "<p style='color:red; text-align:center; padding:20px;'>Failed to load data.<br>Please try again.</p>";
+                document.getElementById('loader-overlay').innerHTML = "<p style='color:red;'>Failed to load data. Please refresh.</p>";
             }
         }
 
         function formatIndianCurrency(num) { return '₹ ' + Number(num).toLocaleString('en-IN'); }
 
+        function matchesCategory(rowCategory, selectedType) {
+            if (selectedType === "ALL") return true;
+            if (!rowCategory) return false;
+            return rowCategory.toString().toUpperCase() === selectedType.toUpperCase();
+        }
+
         function updateStoreDropdown() {
             const type = categoryTypeSelect.value;
-            // Store Category के आधार पर स्टोर फिल्टर करें
-            const stores = [...new Set(rawRows.filter(r => type === "ALL" || r["STORE CATEGORY"] === type).map(r => r["STORE NAME"]))].filter(Boolean).sort();
+            // सिर्फ वही स्टोर दिखाएं जिनमें स्टॉक > 0 है
+            const stores = [...new Set(rawRows.filter(r => 
+                matchesCategory(r["STORE CATEGORY"], type) &&
+                parseInt(r["VOLUME"] || 0) > 0
+            ).map(r => r["STORE NAME"]))].filter(Boolean).sort();
+            
             storeComboDropdown.innerHTML = '';
             createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); updateCategoryDropdown(); }, storeComboDropdown);
             stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
@@ -180,9 +164,11 @@
 
         function updateCategoryDropdown() {
             const type = categoryTypeSelect.value;
+            // सिर्फ वही प्रोडक्ट दिखाएं जिनमें स्टॉक > 0 है
             const cats = [...new Set(rawRows.filter(r => 
-                (type === "ALL" || r["STORE CATEGORY"] === type) && 
-                (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"]))
+                matchesCategory(r["STORE CATEGORY"], type) && 
+                (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) &&
+                parseInt(r["VOLUME"] || 0) > 0
             ).map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
             
             categoryComboDropdown.innerHTML = '';
@@ -211,11 +197,10 @@
             rawRows.forEach(r => {
                 const vol = parseInt(r["VOLUME"] || 0);
                 
-                // शर्तें: Category Type मैच हो, Store मैच हो, Product Category मैच हो, और स्टॉक (vol) > 0 हो
-                if ((type === "ALL" || r["STORE CATEGORY"] === type) &&
+                if (matchesCategory(r["STORE CATEGORY"], type) &&
                     (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) && 
                     (selectedCategories.includes("ALL") || selectedCategories.includes(r["PRODUCT CATEGORY"])) &&
-                    vol > 0) { // ज़ीरो स्टॉक वाली रोज़ को इग्नोर किया जा रहा है
+                    vol > 0) { 
                     
                     let cat = r["PRODUCT CATEGORY"];
                     if(!summary[cat]) summary[cat] = {v:0, p:0};
@@ -239,10 +224,7 @@
             document.getElementById('actionButtons').style.display = 'flex';
         }
 
-        // Action Functions
-        function downloadExcel() {
-            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx");
-        }
+        function downloadExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx"); }
         async function copyScreenshot() {
             const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
             canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
@@ -251,7 +233,6 @@
         document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
         document.getElementById('resetBtn').addEventListener('click', () => location.reload());
         
-        // स्क्रिप्ट रन करें
         loadData();
     </script>
 </body>
