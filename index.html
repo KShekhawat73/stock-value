@@ -3,86 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiVMOR GADGETS - Stock Value Tracker</title>
+    <title>SiVMOR STOCK VALUE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f4f6f9; color: #2c3e50; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; background: #ffffff; border-radius: 20px; padding: 30px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .brand-logo { text-align: center; margin-bottom: 25px; }
-        .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; }
-        .update-timestamp { font-size: 13px; color: #2979ff; text-align: center; margin-top: 8px; font-weight: 500; }
-        .filter-group { margin-bottom: 18px; }
+        body { font-family: -apple-system, sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .app-container { max-width: 480px; margin: auto; background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .update-timestamp { font-size: 13px; color: #2979ff; text-align: center; margin-bottom: 15px; font-weight: 600; }
+        .filter-group { margin-bottom: 15px; }
         .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
-        select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; cursor: pointer; background: #fff; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        select, .btn { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
+        .btn { border: none; cursor: pointer; font-weight: 600; margin-top: 10px; }
         .btn-primary { background-color: #15803d; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 13px; }
-        th, td { border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; }
-        th { background-color: #d9e1f2; color: #0b3c5d; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background-color: #d9e1f2; }
+        .button-group { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="brand-logo">
-            <h1>SiVMOR STOCK VALUE</h1>
-            <div class="update-timestamp" id="lastUpdatedBox">Loading...</div>
-        </div>
+<div class="app-container">
+    <h1>SiVMOR STOCK VALUE</h1>
+    <div class="update-timestamp" id="lastUpdatedBox">Loading...</div>
 
-        <div class="filter-group">
-            <label class="filter-label">Store Category</label>
-            <select id="categoryTypeSelect">
-                <option value="ALL">-- ALL CATEGORIES --</option>
-                <option value="FRANCHISE">FRANCHISE</option>
-                <option value="OWNED">OWNED</option>
-            </select>
-        </div>
-
-        <button class="btn btn-primary" id="searchBtn">Search Filter</button>
-
-        <div id="resultsSection" style="display: none;">
-            <table>
-                <thead>
-                    <tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr>
-                </thead>
-                <tbody id="inventoryTableBody"></tbody>
-            </table>
-        </div>
+    <div class="filter-group">
+        <label class="filter-label">Store Category</label>
+        <select id="categoryTypeSelect">
+            <option value="ALL">-- ALL CATEGORIES --</option>
+            <option value="FRANCHISE">FRANCHISE</option>
+            <option value="OWNED">OWNED</option>
+        </select>
     </div>
 
-    <script>
-        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
-        let rawRows = [];
+    <button class="btn btn-primary" id="searchBtn">Search Filter</button>
 
-        async function loadData() {
-            try {
-                const response = await fetch(BASE_API_URL);
-                const json = await response.json();
-                rawRows = json.rows || [];
-                document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
-            } catch (error) {
-                console.error("Error loading data:", error);
+    <div class="button-group" id="actionButtons" style="display: none;">
+        <button class="btn" onclick="downloadExcel()" style="background:#dcfce7">📥 Excel</button>
+        <button class="btn" onclick="copyScreenshot()" style="background:#dbeafe">📸 Screenshot</button>
+    </div>
+
+    <div id="resultsSection" style="display: none;">
+        <table>
+            <thead><tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr></thead>
+            <tbody id="inventoryTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
+    let rawRows = [];
+
+    async function loadData() {
+        try {
+            const response = await fetch(BASE_API_URL);
+            const json = await response.json();
+            rawRows = json.rows || [];
+            document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
+        } catch (e) { console.error(e); }
+    }
+
+    function generateStoreReport() {
+        const body = document.getElementById('inventoryTableBody');
+        body.innerHTML = "";
+        const catType = document.getElementById('categoryTypeSelect').value;
+        
+        rawRows.forEach(r => {
+            const vol = parseInt(r["VOLUME"] || 0);
+            // कैटेगरी फिल्टर और ज़ीरो स्टॉक हाइड (vol > 0)
+            if ((catType === "ALL" || r["STORE CATEGORY"] === catType) && vol > 0) {
+                body.innerHTML += `<tr><td>${r["PRODUCT CATEGORY"]}</td><td>${vol}</td><td>${r["VALUE"]}</td></tr>`;
             }
-        }
+        });
+        document.getElementById('resultsSection').style.display = 'block';
+        document.getElementById('actionButtons').style.display = 'flex';
+    }
 
-        function generateStoreReport() {
-            const body = document.getElementById('inventoryTableBody');
-            body.innerHTML = "";
-            const catType = document.getElementById('categoryTypeSelect').value;
-            
-            rawRows.forEach(r => {
-                const vol = parseInt(r["VOLUME"] || 0);
-                // Filter by Category Type and hide items with 0 stock
-                if ((catType === "ALL" || r["STORE CATEGORY"] === catType) && vol > 0) {
-                    body.innerHTML += `<tr><td>${r["PRODUCT CATEGORY"]}</td><td>${vol}</td><td>${r["VALUE"]}</td></tr>`;
-                }
-            });
-            document.getElementById('resultsSection').style.display = 'block';
-        }
+    function downloadExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx"); }
+    async function copyScreenshot() {
+        const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
+        canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
+    }
 
-        document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
-        loadData();
-    </script>
+    document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
+    loadData();
+</script>
 </body>
 </html>
