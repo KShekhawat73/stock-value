@@ -3,91 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiVMOR STOCK VALUE</title>
+    <title>SiVMOR GADGETS - Stock Value Tracker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f4f6f9; padding: 20px; }
-        .app-container { max-width: 480px; margin: auto; background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .update-timestamp { font-size: 13px; color: #2979ff; text-align: center; margin-bottom: 15px; font-weight: 600; }
-        .filter-group { margin-bottom: 15px; }
-        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
-        select, .btn { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
-        .btn { border: none; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 30px 24px;
+            box-sizing: border-box;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .brand-logo { text-align: center; margin-bottom: 25px; }
+        .brand-logo h1 { margin: 0; font-size: 26px; color: #0b3c5d; letter-spacing: 0.5px; font-weight: 800; }
+        .brand-logo p { margin: 6px 0 0 0; font-size: 11px; color: #8a99ad; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; }
+        .update-timestamp { font-size: 13px; font-style: italic; color: #2979ff; text-align: center; margin-top: 8px; margin-bottom: 20px; font-weight: 500; }
+        .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; }
+        .spinner-3d { width: 44px; height: 44px; border: 5px solid #e2e8f0; border-top: 5px solid #15803d; border-radius: 50%; animation: spin3d 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes spin3d { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { margin-top: 20px; font-size: 13px; font-weight: 600; color: #64748b; }
+        .filter-group { margin-bottom: 18px; position: relative; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+        select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; color: #1e293b; box-sizing: border-box; outline: none; transition: all 0.2s ease-in-out; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .combo-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 4px 0; }
+        .combo-dropdown.show { display: block; }
+        .combo-item { display: flex; align-items: center; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+        .combo-item:hover { background-color: #f1f5f9; }
+        .combo-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #15803d; cursor: pointer; }
+        .button-group { display: flex; gap: 14px; margin-top: 25px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s ease; }
         .btn-primary { background-color: #15803d; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
-        th { background-color: #d9e1f2; }
-        .button-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .table-container { width: 100%; margin-top: 25px; border: 1px solid #cbd5e1; background-color: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .table-header-main { background-color: #f8fafc; color: #0b3c5d; font-weight: 800; font-size: 15px; text-align: center; padding: 10px; border: 1px solid #cbd5e1; text-transform: uppercase; }
+        th { border: 1px solid #cbd5e1; padding: 10px 8px; font-weight: 700; color: #0b3c5d; background-color: #d9e1f2; text-align: left; }
+        td { padding: 10px 8px; border: 1px solid #cbd5e1; color: #2c3e50; background-color: #ffffff; text-align: left; }
+        .td-category { font-weight: 700; text-transform: uppercase; }
+        .data-cell { font-weight: 600; }
+        .highlight-row td { background-color: #e0f2fe !important; color: #16a34a !important; }
+        .tr-total td { font-weight: 800; border-top: 2px solid #2c3e50; padding: 12px 8px; background-color: #fce4d6 !important; color: #000000 !important; }
+        .total-label { text-align: center !important; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h1>SiVMOR STOCK VALUE</h1>
-    <div class="update-timestamp" id="lastUpdatedBox">Loading...</div>
+    <div class="app-container">
+        <div class="brand-logo">
+            <h1>SiVMOR STOCK VALUE</h1>
+            <p>STOCK VALUE TRACKER</p>
+            <div class="update-timestamp" id="lastUpdatedBox">Last Updated at --</div>
+        </div>
 
-    <div class="filter-group">
-        <label class="filter-label">Store Category</label>
-        <select id="categoryTypeSelect">
-            <option value="ALL">-- ALL CATEGORIES --</option>
-            <option value="FRANCHISE">FRANCHISE</option>
-            <option value="OWNED">OWNED</option>
-        </select>
+        <div id="loader-overlay" class="loader-container">
+            <div class="spinner-3d"></div>
+            <div class="loader-text">Loading database...</div>
+        </div>
+
+        <div id="app-content" style="display: none;">
+            <div class="filter-group">
+                <label class="filter-label">Store Category</label>
+                <select id="categoryTypeSelect">
+                    <option value="ALL">-- ALL CATEGORIES --</option>
+                    <option value="FRANCHISE">FRANCHISE</option>
+                    <option value="OWNED">OWNED</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Store Name</label>
+                <div class="combo-box-btn" id="storeComboBtn">-- ALL STORES --</div>
+                <div class="combo-dropdown" id="storeComboDropdown"></div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Product Category</label>
+                <div class="combo-box-btn" id="categoryComboBtn">-- ALL CATEGORIES --</div>
+                <div class="combo-dropdown" id="categoryComboDropdown"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="searchBtn">Search Filter</button>
+                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+            </div>
+
+            <div class="button-group" id="actionButtons" style="display: none;">
+                <button class="btn btn-secondary" onclick="downloadExcel()" style="background-color: #dcfce7; border-color: #bbf7d0;">📥 Excel</button>
+                <button class="btn btn-secondary" onclick="copyScreenshot()" style="background-color: #dbeafe; border-color: #bfdbfe;">📸 Screenshot</button>
+            </div>
+
+            <div id="resultsSection" style="display: none;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th colspan="3" class="table-header-main" id="tableMainHeader">STORE DATA</th></tr>
+                            <tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <button class="btn btn-primary" id="searchBtn">Search Filter</button>
+    <script>
+        // आपका नया API URL
+        const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
+        let rawRows = [], selectedStores = ["ALL"], selectedCategories = ["ALL"];
 
-    <div class="button-group" id="actionButtons" style="display: none;">
-        <button class="btn" onclick="downloadExcel()" style="background:#dcfce7">📥 Excel</button>
-        <button class="btn" onclick="copyScreenshot()" style="background:#dbeafe">📸 Screenshot</button>
-    </div>
+        const categoryTypeSelect = document.getElementById('categoryTypeSelect');
+        const storeComboBtn = document.getElementById('storeComboBtn');
+        const storeComboDropdown = document.getElementById('storeComboDropdown');
+        const categoryComboBtn = document.getElementById('categoryComboBtn');
+        const categoryComboDropdown = document.getElementById('categoryComboDropdown');
 
-    <div id="resultsSection" style="display: none;">
-        <table>
-            <thead><tr><th>CATEGORY</th><th>VOL</th><th>VALUE</th></tr></thead>
-            <tbody id="inventoryTableBody"></tbody>
-        </table>
-    </div>
-</div>
+        // Toggle dropdowns
+        storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
+        categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
+        document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
 
-<script>
-    const BASE_API_URL = "https://script.google.com/macros/s/AKfycbwxVX1sChTD7uyUgPBMYMSh8WsHl_objmmDevsqNSoaKmMLYkwCtx96RZd4055MKyCr/exec";
-    let rawRows = [];
-
-    async function loadData() {
-        try {
-            const response = await fetch(BASE_API_URL);
-            const json = await response.json();
-            rawRows = json.rows || [];
-            document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
-        } catch (e) { console.error(e); }
-    }
-
-    function generateStoreReport() {
-        const body = document.getElementById('inventoryTableBody');
-        body.innerHTML = "";
-        const catType = document.getElementById('categoryTypeSelect').value;
-        
-        rawRows.forEach(r => {
-            const vol = parseInt(r["VOLUME"] || 0);
-            // कैटेगरी फिल्टर और ज़ीरो स्टॉक हाइड (vol > 0)
-            if ((catType === "ALL" || r["STORE CATEGORY"] === catType) && vol > 0) {
-                body.innerHTML += `<tr><td>${r["PRODUCT CATEGORY"]}</td><td>${vol}</td><td>${r["VALUE"]}</td></tr>`;
-            }
+        // जब Store Category (OWNED/FRANCHISE) बदले, तो Store Name लिस्ट अपडेट करें
+        categoryTypeSelect.addEventListener('change', () => {
+            selectedStores = ["ALL"]; 
+            updateStoreDropdown();
+            updateCategoryDropdown();
         });
-        document.getElementById('resultsSection').style.display = 'block';
-        document.getElementById('actionButtons').style.display = 'flex';
-    }
 
-    function downloadExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx"); }
-    async function copyScreenshot() {
-        const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
-        canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
-    }
+        async function loadData() {
+            try {
+                const response = await fetch(BASE_API_URL);
+                const json = await response.json();
+                rawRows = json.rows || [];
+                
+                // Last Updated टाइम दिखाएं
+                document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
+                
+                document.getElementById('loader-overlay').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
+                updateStoreDropdown();
+                updateCategoryDropdown();
+            } catch (error) { 
+                console.error(error); 
+                document.getElementById('loader-overlay').innerHTML = "<p style='color:red;'>Failed to load data. Please refresh.</p>";
+            }
+        }
 
-    document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
-    loadData();
-</script>
+        function formatIndianCurrency(num) { return '₹ ' + Number(num).toLocaleString('en-IN'); }
+
+        function updateStoreDropdown() {
+            const type = categoryTypeSelect.value;
+            // Store Category के आधार पर स्टोर फिल्टर करें
+            const stores = [...new Set(rawRows.filter(r => type === "ALL" || r["STORE CATEGORY"] === type).map(r => r["STORE NAME"]))].filter(Boolean).sort();
+            storeComboDropdown.innerHTML = '';
+            createCheckbox("ALL", "-- ALL STORES --", selectedStores, (v, c) => { selectedStores = c ? ["ALL"] : []; updateStoreDropdown(); }, storeComboDropdown);
+            stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
+                if(c) { selectedStores = selectedStores.filter(i=>i!=="ALL"); selectedStores.push(v); }
+                else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
+                updateStoreDropdown(); updateCategoryDropdown();
+            }, storeComboDropdown));
+            storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
+        }
+
+        function updateCategoryDropdown() {
+            const type = categoryTypeSelect.value;
+            const cats = [...new Set(rawRows.filter(r => 
+                (type === "ALL" || r["STORE CATEGORY"] === type) && 
+                (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"]))
+            ).map(r => r["PRODUCT CATEGORY"]))].filter(Boolean).sort();
+            
+            categoryComboDropdown.innerHTML = '';
+            createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { selectedCategories = c ? ["ALL"] : []; updateCategoryDropdown(); }, categoryComboDropdown);
+            cats.forEach(c => createCheckbox(c, c, selectedCategories, (v, checked) => {
+                if(checked) { selectedCategories = selectedCategories.filter(i=>i!=="ALL"); selectedCategories.push(v); }
+                else { selectedCategories = selectedCategories.filter(i=>i!==v); if(selectedCategories.length===0) selectedCategories=["ALL"]; }
+                updateCategoryDropdown();
+            }, categoryComboDropdown));
+            categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
+        }
+
+        function createCheckbox(val, label, arr, callback, container) {
+            const div = document.createElement('div'); div.className = 'combo-item';
+            div.innerHTML = `<input type="checkbox" ${arr.includes(val) ? 'checked' : ''}> ${label}`;
+            div.addEventListener('click', (e) => { callback(val, div.querySelector('input').checked); });
+            container.appendChild(div);
+        }
+
+        function generateStoreReport() {
+            const body = document.getElementById('inventoryTableBody');
+            body.innerHTML = "";
+            let summary = {}, gVol = 0, gVal = 0;
+            const type = categoryTypeSelect.value;
+            
+            rawRows.forEach(r => {
+                const vol = parseInt(r["VOLUME"] || 0);
+                
+                // शर्तें: Category Type मैच हो, Store मैच हो, Product Category मैच हो, और स्टॉक (vol) > 0 हो
+                if ((type === "ALL" || r["STORE CATEGORY"] === type) &&
+                    (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) && 
+                    (selectedCategories.includes("ALL") || selectedCategories.includes(r["PRODUCT CATEGORY"])) &&
+                    vol > 0) { // ज़ीरो स्टॉक वाली रोज़ को इग्नोर किया जा रहा है
+                    
+                    let cat = r["PRODUCT CATEGORY"];
+                    if(!summary[cat]) summary[cat] = {v:0, p:0};
+                    summary[cat].v += vol;
+                    summary[cat].p += parseFloat(r["VALUE"] || 0);
+                }
+            });
+
+            const keys = Object.keys(summary);
+            if(keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">No Stock Available</td></tr>`;
+            } else {
+                keys.forEach(k => {
+                    gVol += summary[k].v; gVal += summary[k].p;
+                    body.innerHTML += `<tr><td class="td-category">${k}</td><td>${summary[k].v}</td><td>${formatIndianCurrency(Math.round(summary[k].p))}</td></tr>`;
+                });
+                body.innerHTML += `<tr class="tr-total"><td class="total-label">TOTAL</td><td>${gVol}</td><td>${formatIndianCurrency(Math.round(gVal))}</td></tr>`;
+            }
+            
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'flex';
+        }
+
+        // Action Functions
+        function downloadExcel() {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector('table')), "Report.xlsx");
+        }
+        async function copyScreenshot() {
+            const canvas = await html2canvas(document.getElementById('resultsSection'), { scale: 2 });
+            canvas.toBlob(b => navigator.clipboard.write([new ClipboardItem({"image/png": b})]).then(() => alert("Copied!")));
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', generateStoreReport);
+        document.getElementById('resetBtn').addEventListener('click', () => location.reload());
+        
+        // स्क्रिप्ट रन करें
+        loadData();
+    </script>
 </body>
 </html>
