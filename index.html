@@ -29,7 +29,10 @@
         
         .button-group { display: flex; gap: 14px; margin-top: 25px; }
         .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s ease; }
-        .btn-reset { background-color: #ef4444; color: white; width: 100%; } /* नया रिसेट बटन डिज़ाइन */
+        
+        /* नया लाइट ब्लू रिसेट बटन डिज़ाइन */
+        .btn-reset { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; width: 100%; } 
+        
         .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
         .table-container { width: 100%; margin-top: 25px; border: 1px solid #cbd5e1; background-color: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -119,13 +122,12 @@
         storeComboDropdown.addEventListener('click', (e) => e.stopPropagation());
         categoryComboDropdown.addEventListener('click', (e) => e.stopPropagation());
 
-        // ऑटो-सर्च: Category Type बदलने पर
         categoryTypeSelect.addEventListener('change', () => {
             selectedStores = ["ALL"]; 
             selectedCategories = ["ALL"];
             updateStoreDropdown();
             updateCategoryDropdown();
-            generateStoreReport(); // <--- तुरंत डेटा अपडेट
+            generateStoreReport(); 
         });
 
         async function loadData() {
@@ -133,12 +135,12 @@
                 const response = await fetch(BASE_API_URL);
                 const json = await response.json();
                 rawRows = json.rows || [];
-                document.getElementById('lastUpdatedBox').innerText = "Last Updated at " + (json.updatedAt || "--");
+                document.getElementById('lastUpdatedBox').innerText = "Last Updated: " + (json.updatedAt || "--");
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
                 updateStoreDropdown();
                 updateCategoryDropdown();
-                generateStoreReport(); // <--- पेज लोड होते ही डिफ़ॉल्ट डेटा दिखाएं
+                generateStoreReport(); 
             } catch (error) { 
                 console.error("Fetch Error:", error); 
                 document.getElementById('loader-overlay').innerHTML = "<p style='color:red;'>Failed to load data. Please refresh.</p>";
@@ -165,7 +167,7 @@
                 selectedStores = c ? ["ALL"] : []; 
                 updateStoreDropdown(); 
                 updateCategoryDropdown(); 
-                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+                generateStoreReport(); 
             }, storeComboDropdown);
 
             stores.forEach(s => createCheckbox(s, s, selectedStores, (v, c) => { 
@@ -173,7 +175,7 @@
                 else { selectedStores = selectedStores.filter(i=>i!==v); if(selectedStores.length===0) selectedStores=["ALL"]; }
                 updateStoreDropdown(); 
                 updateCategoryDropdown();
-                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+                generateStoreReport(); 
             }, storeComboDropdown));
             storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
         }
@@ -190,14 +192,14 @@
             createCheckbox("ALL", "-- ALL CATEGORIES --", selectedCategories, (v, c) => { 
                 selectedCategories = c ? ["ALL"] : []; 
                 updateCategoryDropdown(); 
-                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+                generateStoreReport(); 
             }, categoryComboDropdown);
 
             cats.forEach(c => createCheckbox(c, c, selectedCategories, (v, checked) => {
                 if(checked) { selectedCategories = selectedCategories.filter(i=>i!=="ALL"); selectedCategories.push(v); }
                 else { selectedCategories = selectedCategories.filter(i=>i!==v); if(selectedCategories.length===0) selectedCategories=["ALL"]; }
                 updateCategoryDropdown();
-                generateStoreReport(); // <--- तुरंत डेटा अपडेट
+                generateStoreReport(); 
             }, categoryComboDropdown));
             categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
         }
@@ -253,7 +255,6 @@
             document.getElementById('actionButtons').style.display = 'flex';
         }
 
-        // नया रिसेट फंक्शन जो बिना पेज रीलोड किए सब कुछ क्लियर कर देगा
         document.getElementById('resetBtn').addEventListener('click', () => {
             categoryTypeSelect.value = "ALL";
             selectedStores = ["ALL"];
