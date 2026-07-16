@@ -20,11 +20,14 @@
         .filter-group { margin-bottom: 18px; position: relative; }
         .filter-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
         select, .combo-box-btn { width: 100%; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; color: #1e293b; box-sizing: border-box; outline: none; transition: all 0.2s ease-in-out; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .combo-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 4px 0; }
+        .combo-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 4px 0; }
         .combo-dropdown.show { display: block; }
-        .combo-item { display: flex; align-items: center; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+        
+        /* यहाँ Padding 10px से घटाकर 5px कर दी गई है जिससे गैप कम हो जाए */
+        .combo-item { display: flex; align-items: center; padding: 5px 14px; cursor: pointer; font-size: 13px; margin-bottom: 2px; }
         .combo-item:hover { background-color: #f1f5f9; }
         .combo-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #15803d; cursor: pointer; }
+        
         .button-group { display: flex; gap: 14px; margin-top: 25px; }
         .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s ease; }
         .btn-primary { background-color: #15803d; color: white; }
@@ -110,9 +113,16 @@
         const categoryComboBtn = document.getElementById('categoryComboBtn');
         const categoryComboDropdown = document.getElementById('categoryComboDropdown');
 
+        // Toggle dropdowns
         storeComboBtn.addEventListener('click', (e) => { e.stopPropagation(); storeComboDropdown.classList.toggle('show'); categoryComboDropdown.classList.remove('show'); });
         categoryComboBtn.addEventListener('click', (e) => { e.stopPropagation(); categoryComboDropdown.classList.toggle('show'); storeComboDropdown.classList.remove('show'); });
+        
+        // बाहर क्लिक करने पर ड्रॉपडाउन बंद होगा
         document.addEventListener('click', () => { storeComboDropdown.classList.remove('show'); categoryComboDropdown.classList.remove('show'); });
+
+        // ड्रॉपडाउन के अंदर (स्क्रॉलबार आदि) क्लिक करने पर बंद होने से रोकें
+        storeComboDropdown.addEventListener('click', (e) => e.stopPropagation());
+        categoryComboDropdown.addEventListener('click', (e) => e.stopPropagation());
 
         categoryTypeSelect.addEventListener('change', () => {
             selectedStores = ["ALL"]; 
@@ -146,7 +156,6 @@
 
         function updateStoreDropdown() {
             const type = categoryTypeSelect.value;
-            // सिर्फ वही स्टोर दिखाएं जिनमें स्टॉक > 0 है
             const stores = [...new Set(rawRows.filter(r => 
                 matchesCategory(r["STORE CATEGORY"], type) &&
                 parseInt(r["VOLUME"] || 0) > 0
@@ -160,11 +169,11 @@
                 updateStoreDropdown(); updateCategoryDropdown();
             }, storeComboDropdown));
             storeComboBtn.innerText = selectedStores.includes("ALL") ? "-- ALL STORES --" : `${selectedStores.length} Selected`;
+            storeComboDropdown.classList.add('show'); // अपडेट होने पर खुला रखे
         }
 
         function updateCategoryDropdown() {
             const type = categoryTypeSelect.value;
-            // सिर्फ वही प्रोडक्ट दिखाएं जिनमें स्टॉक > 0 है
             const cats = [...new Set(rawRows.filter(r => 
                 matchesCategory(r["STORE CATEGORY"], type) && 
                 (selectedStores.includes("ALL") || selectedStores.includes(r["STORE NAME"])) &&
@@ -179,12 +188,24 @@
                 updateCategoryDropdown();
             }, categoryComboDropdown));
             categoryComboBtn.innerText = selectedCategories.includes("ALL") ? "-- ALL CATEGORIES --" : `${selectedCategories.length} Selected`;
+            categoryComboDropdown.classList.add('show'); // अपडेट होने पर खुला रखे
         }
 
         function createCheckbox(val, label, arr, callback, container) {
             const div = document.createElement('div'); div.className = 'combo-item';
-            div.innerHTML = `<input type="checkbox" ${arr.includes(val) ? 'checked' : ''}> ${label}`;
-            div.addEventListener('click', (e) => { callback(val, div.querySelector('input').checked); });
+            div.innerHTML = `<input type="checkbox" ${arr.includes(val) ? 'checked' : ''}> <span>${label}</span>`;
+            
+            // e.stopPropagation() से यह बाहर वाले क्लिक इवेंट को रोक देगा
+            div.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                
+                // अगर चेकबॉक्स के अलावा कहीं क्लिक हुआ है, तो उसे मैन्युअली टॉगल करें
+                if (e.target.tagName !== 'INPUT') {
+                    const cb = div.querySelector('input');
+                    cb.checked = !cb.checked;
+                }
+                callback(val, div.querySelector('input').checked); 
+            });
             container.appendChild(div);
         }
 
